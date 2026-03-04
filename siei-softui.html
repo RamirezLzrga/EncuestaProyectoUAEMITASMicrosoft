@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIEI – UAEMex · Soft UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ══════════════════════════════════════════
+   TOKENS
+   UAEMex Verde #2D5016 / Oro #C99A0A
+   Neumorphism base: #e8ede2  (tinted green-grey)
+══════════════════════════════════════════ */
+:root {
+  --bg:          #e8ede2;
+  --bg-dark:     #dde3d6;
+  --bg-light:    #f3f7ee;
+
+  --neu-shadow-dark:  #c4c9be;
+  --neu-shadow-light: #ffffff;
+
+  --verde:       #2D5016;
+  --verde-mid:   #3a6b1c;
+  --verde-pale:  #c8dbb8;
+  --verde-xpale: #ddebd0;
+  --oro:         #C99A0A;
+  --oro-pale:    #f5e6a3;
+  --oro-bright:  #e0ae12;
+
+  --text-dark:   #1e2d14;
+  --text:        #3a4a2c;
+  --text-muted:  #7a8f6a;
+  --text-light:  #a5b896;
+
+  --red:         #c0392b;
+  --red-pale:    #fde8e6;
+  --green:       #1e7e34;
+  --green-pale:  #e2f4e7;
+  --blue:        #1a5299;
+  --blue-pale:   #ddeaf8;
+
+  --radius-sm:   8px;
+  --radius:      16px;
+  --radius-lg:   24px;
+  --radius-xl:   32px;
+
+  /* Neumorphic shadows */
+  --neu-out: 6px 6px 14px var(--neu-shadow-dark), -6px -6px 14px var(--neu-shadow-light);
+  --neu-out-lg: 10px 10px 24px var(--neu-shadow-dark), -10px -10px 24px var(--neu-shadow-light);
+  --neu-in:  inset 4px 4px 10px var(--neu-shadow-dark), inset -4px -4px 10px var(--neu-shadow-light);
+  --neu-in-sm: inset 2px 2px 6px var(--neu-shadow-dark), inset -2px -2px 6px var(--neu-shadow-light);
+  --neu-press: inset 5px 5px 12px var(--neu-shadow-dark), inset -5px -5px 12px var(--neu-shadow-light);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════════════════════════════════
+   TOP NAV
+══════════════════════════════════════════ */
+.topnav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  background: var(--bg);
+  padding: 0 36px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,.08);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-right: 40px;
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  width: 42px; height: 42px;
+  border-radius: 14px;
+  background: var(--verde);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--neu-out);
+  flex-shrink: 0;
+}
+
+.brand-logo svg { width: 22px; height: 22px; fill: var(--oro-bright); }
+
+.brand-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--verde);
+  letter-spacing: -.3px;
+  line-height: 1.1;
+}
+
+.brand-sub {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+/* pill nav */
+.nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  background: var(--bg);
+  border-radius: 999px;
+  padding: 5px;
+  box-shadow: var(--neu-in-sm);
+  max-width: 560px;
+}
+
+.nav-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.nav-pill:hover { color: var(--verde); }
+
+.nav-pill.active {
+  background: var(--verde);
+  color: white;
+  box-shadow: 4px 4px 10px rgba(45,80,22,.35), -2px -2px 6px rgba(255,255,255,.2);
+}
+
+.nav-pill svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+.nav-badge {
+  background: var(--oro-bright);
+  color: var(--verde);
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--neu-out);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.status-led {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #4caf50;
+  box-shadow: 0 0 6px #4caf5099;
+  animation: breathe 2.5s infinite;
+}
+
+@keyframes breathe {
+  0%,100%{ box-shadow: 0 0 6px #4caf5099; }
+  50%    { box-shadow: 0 0 12px #4caf50cc; }
+}
+
+.avatar-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--verde);
+  color: var(--oro-bright);
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: var(--neu-out);
+  transition: box-shadow .2s;
+  flex-shrink: 0;
+  border: 3px solid var(--bg);
+  outline: 3px solid var(--verde-pale);
+}
+
+.avatar-btn:hover { box-shadow: var(--neu-out-lg); }
+
+/* ══════════════════════════════════════════
+   CONTENT WRAPPER
+══════════════════════════════════════════ */
+.wrapper {
+  padding: 90px 36px 60px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* ══════════════════════════════════════════
+   PAGE SECTIONS
+══════════════════════════════════════════ */
+.page { display: none; animation: fadeIn .3s ease; }
+.page.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   PAGE HEADER
+══════════════════════════════════════════ */
+.ph {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.ph-left {}
+
+.ph-label {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--oro);
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.ph-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-dark);
+  letter-spacing: -.5px;
+  line-height: 1.1;
+}
+
+.ph-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+
+.ph-actions { display: flex; gap: 12px; align-items: center; }
+
+/* ══════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: all .2s;
+  border: none;
+  text-decoration: none;
+  user-select: none;
+}
+
+.btn-neu {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--neu-out);
+}
+.btn-neu:hover { box-shadow: var(--neu-out-lg); }
+.btn-neu:active { box-shadow: var(--neu-press); }
+
+.btn-solid {
+  background: var(--verde);
+  color: white;
+  box-shadow: 5px 5px 14px rgba(45,80,22,.4), -3px -3px 8px rgba(255,255,255,.3);
+}
+.btn-solid:hover { background: var(--verde-mid); }
+.btn-solid:active { box-shadow: inset 3px 3px 8px rgba(0,0,0,.3); }
+
+.btn-oro {
+  background: var(--oro-bright);
+  color: var(--verde);
+  box-shadow: 5px 5px 14px rgba(201,154,10,.35), -3px -3px 8px rgba(255,255,255,.4);
+}
+.btn-oro:hover { background: var(--oro); color: white; }
+
+.btn-sm { padding: 8px 16px; font-size: 12.5px; }
+
+.btn-icon {
+  width: 42px; height: 42px;
+  padding: 0;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+
+/* ══════════════════════════════════════════
+   NEU CARD BASE
+══════════════════════════════════════════ */
+.nc {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+}
+
+.nc-sm { border-radius: var(--radius); padding: 18px; }
+
+.nc-inset {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--neu-in);
+  padding: 16px;
+}
+
+/* ══════════════════════════════════════════
+   DASHBOARD GRID
+══════════════════════════════════════════ */
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 22px;
+}
+
+/* ── KPI ROW ── */
+.kpi-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.kpi-card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow .25s;
+}
+
+.kpi-card:hover { box-shadow: var(--neu-out-lg); }
+
+.kpi-card-bg {
+  position: absolute;
+  bottom: -14px; right: -14px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  opacity: .1;
+}
+
+.kp-top { display: flex; align-items: center; justify-content: space-between; }
+
+.kp-icon {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  box-shadow: var(--neu-out);
+}
+
+.kp-change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.kp-up   { background: var(--green-pale); color: var(--green); }
+.kp-down { background: var(--red-pale);   color: var(--red);   }
+.kp-flat { background: var(--bg-dark);    color: var(--text-muted); }
+
+.kp-value {
+  font-family: 'Sora', sans-serif;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-dark);
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
+
+.kp-label {
+  font-size: 11.5px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.kp-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: -6px;
+}
+
+/* ── WELCOME BANNER ── */
+.welcome-band {
+  grid-column: 1 / 8;
+  background: var(--verde);
+  border-radius: var(--radius-lg);
+  padding: 28px 30px;
+  box-shadow: 8px 8px 20px rgba(45,80,22,.35), -4px -4px 12px rgba(255,255,255,.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative;
+}
+
+.wb-circles {
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  border: 40px solid rgba(255,255,255,.04);
+}
+
+.wb-circles2 {
+  position: absolute;
+  bottom: -40px; right: 40px;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  border: 30px solid rgba(255,255,255,.03);
+}
+
+.wb-tag {
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--oro-pale);
+  margin-bottom: 8px;
+  opacity: .8;
+}
+
+.wb-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.wb-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,.6);
+  max-width: 300px;
+}
+
+.wb-date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.wb-date-day {
+  font-family: 'Sora', sans-serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--oro-bright);
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.wb-date-rest {
+  font-size: 13px;
+  color: rgba(255,255,255,.5);
+  font-family: 'JetBrains Mono', monospace;
+  text-align: right;
+}
+
+/* ── QUICK ACTIONS ── */
+.quick-actions {
+  grid-column: 8 / -1;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+}
+
+.qa-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+  font-family: 'Sora', sans-serif;
+}
+
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.qa-item {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--neu-out);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: box-shadow .2s;
+  text-align: center;
+}
+.qa-item:hover { box-shadow: var(--neu-out-lg); }
+.qa-item:active { box-shadow: var(--neu-press); }
+
+.qa-emoji { font-size: 22px; }
+.qa-label { font-size: 11.5px; font-weight: 700; color: var(--text); }
+
+/* ── CHART AREA ── */
+.chart-card {
+  grid-column: 1 / 8;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+}
+
+.cc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.cc-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.cc-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.tab-group {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  box-shadow: var(--neu-in-sm);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.tg-tab {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .2s;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.tg-tab.active {
+  background: var(--verde);
+  color: white;
+  box-shadow: 3px 3px 8px rgba(45,80,22,.3), -1px -1px 4px rgba(255,255,255,.2);
+}
+
+.chart-body {
+  height: 160px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 0 4px;
+}
+
+.cb-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.cb-bar {
+  width: 100%;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: inset -2px -2px 5px rgba(255,255,255,.4), inset 2px 2px 5px rgba(0,0,0,.08);
+  cursor: pointer;
+  transition: opacity .15s;
+  min-height: 6px;
+  position: relative;
+}
+.cb-bar:hover { opacity: .8; }
+
+.cb-bar.verde { background: linear-gradient(180deg, var(--verde-mid), var(--verde)); }
+.cb-bar.oro   { background: linear-gradient(180deg, var(--oro-bright), var(--oro)); }
+
+.cb-month {
+  font-size: 9.5px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* ── DONUT WIDGET ── */
+.donut-card {
+  grid-column: 8 / -1;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 16px;
+  flex: 1;
+}
+
+.donut-svg-wrap {
+  position: relative;
+  width: 110px; height: 110px;
+  flex-shrink: 0;
+}
+
+.donut-svg { width: 110px; height: 110px; transform: rotate(-90deg); }
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-pct {
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1;
+}
+
+.donut-pct-label {
+  font-size: 9.5px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.donut-legend { display: flex; flex-direction: column; gap: 9px; flex: 1; }
+
+.dl-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.dl-dot {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.dl-val {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* ── PROGRESS WIDGET ── */
+.progress-card {
+  grid-column: 1 / 5;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+}
+
+.pw-items { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+
+.pw-item {}
+
+.pw-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pw-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.pw-pct  { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-weight: 500; }
+
+.pw-track {
+  height: 10px;
+  background: var(--bg);
+  border-radius: 999px;
+  box-shadow: var(--neu-in-sm);
+  overflow: hidden;
+}
+
+.pw-fill {
+  height: 100%;
+  border-radius: 999px;
+  box-shadow: inset -1px -1px 3px rgba(255,255,255,.3), inset 1px 1px 3px rgba(0,0,0,.1);
+  transition: width .8s ease;
+}
+
+.pw-fill.verde { background: linear-gradient(90deg, var(--verde-mid), var(--verde-pale)); }
+.pw-fill.oro   { background: linear-gradient(90deg, var(--oro-bright), var(--oro-pale)); }
+.pw-fill.mix   { background: linear-gradient(90deg, var(--verde), var(--oro-bright)); }
+
+/* ── HEATMAP ── */
+.heatmap-card {
+  grid-column: 5 / 9;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+}
+
+.hm-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 16px;
+}
+
+.hm-day-label {
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  text-align: center;
+  color: var(--text-light);
+  text-transform: uppercase;
+  padding-bottom: 4px;
+}
+
+.hm-cell {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform .15s;
+  box-shadow: 2px 2px 5px var(--neu-shadow-dark), -1px -1px 3px var(--neu-shadow-light);
+}
+.hm-cell:hover { transform: scale(1.15); }
+
+.hm-0 { background: var(--bg-dark); }
+.hm-1 { background: var(--verde-xpale); }
+.hm-2 { background: var(--verde-pale); }
+.hm-3 { background: var(--verde-mid); }
+.hm-4 { background: var(--verde); }
+
+/* ── RECENT SURVEYS TABLE ── */
+.table-card {
+  grid-column: 9 / -1;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+}
+
+.rc-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+
+.rc-item {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--neu-out);
+  padding: 13px 15px;
+  transition: box-shadow .2s;
+  cursor: pointer;
+}
+.rc-item:hover { box-shadow: var(--neu-out-lg); }
+
+.rc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.rc-name { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+.rc-bar-wrap { display: flex; align-items: center; gap: 8px; }
+
+.rc-mini-bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  box-shadow: var(--neu-in-sm);
+  overflow: hidden;
+}
+.rc-mini-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--verde), var(--verde-pale));
+}
+
+.rc-num { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); white-space: nowrap; }
+
+/* ── TIMELINE WIDGET ── */
+.timeline-card {
+  grid-column: 1 / 5;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+}
+
+.tl-list { display: flex; flex-direction: column; gap: 0; margin-top: 14px; position: relative; }
+
+.tl-line {
+  position: absolute;
+  left: 16px;
+  top: 8px; bottom: 8px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--verde-pale), transparent);
+  border-radius: 999px;
+}
+
+.tl-item {
+  display: flex;
+  gap: 14px;
+  padding: 9px 0;
+  position: relative;
+}
+
+.tl-dot {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: var(--neu-out);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.tl-content {}
+.tl-action { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+.tl-meta   { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+/* ══════════════════════════════════════════
+   SURVEYS PAGE
+══════════════════════════════════════════ */
+.surveys-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.filter-neu {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 18px 24px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fn-label {
+  font-size: 11.5px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.fn-input {
+  background: var(--bg);
+  box-shadow: var(--neu-in-sm);
+  border: none;
+  border-radius: 999px;
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  outline: none;
+  transition: box-shadow .2s;
+}
+.fn-input:focus { box-shadow: var(--neu-in); }
+.fn-input::placeholder { color: var(--text-light); }
+
+select.fn-input {
+  cursor: pointer;
+  appearance: none;
+  padding-right: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%237a8f6a' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.fn-search { flex: 1; position: relative; min-width: 200px; }
+.fn-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--text-light); pointer-events: none; }
+.fn-search input { width: 100%; padding-left: 36px; }
+
+/* survey cards grid */
+.surveys-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.survey-card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 0;
+  overflow: hidden;
+  transition: box-shadow .2s;
+  cursor: pointer;
+}
+.survey-card:hover { box-shadow: var(--neu-out-lg); }
+
+.sc-banner {
+  height: 6px;
+}
+.sc-banner.activa   { background: linear-gradient(90deg, var(--verde), var(--verde-pale)); }
+.sc-banner.pendiente{ background: linear-gradient(90deg, var(--oro-bright), var(--oro-pale)); }
+.sc-banner.cerrada  { background: linear-gradient(90deg, var(--text-muted), var(--bg-dark)); }
+
+.sc-body { padding: 18px 20px; }
+
+.sc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.sc-name { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-dark); line-height: 1.2; }
+.sc-desc { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+.badge-neu {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: var(--neu-out);
+  white-space: nowrap;
+}
+
+.bn-green { color: var(--green); }
+.bn-gold  { color: var(--oro); }
+.bn-muted { color: var(--text-muted); }
+
+.sc-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.sc-stat {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--neu-in-sm);
+  padding: 10px;
+  text-align: center;
+}
+
+.sc-stat-val { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-dark); }
+.sc-stat-label { font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text-light); text-transform: uppercase; margin-top: 2px; }
+
+.sc-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,.05);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.sc-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--verde);
+  color: var(--oro-bright);
+  font-size: 11px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: var(--neu-out);
+}
+
+.sc-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.sc-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  box-shadow: var(--neu-out);
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .2s;
+  font-family: 'Nunito', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.sc-btn:hover { color: var(--verde); box-shadow: var(--neu-out-lg); }
+.sc-btn:active { box-shadow: var(--neu-press); }
+.sc-btn.del:hover { color: var(--red); }
+
+/* ══════════════════════════════════════════
+   USERS PAGE
+══════════════════════════════════════════ */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.user-card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+  text-align: center;
+  transition: box-shadow .2s;
+}
+.user-card:hover { box-shadow: var(--neu-out-lg); }
+
+.uc-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  display: grid;
+  place-items: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  box-shadow: var(--neu-out-lg);
+}
+
+.uc-name { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-dark); }
+.uc-email { font-size: 11.5px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 3px; }
+
+.uc-tags {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.uc-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.uc-stat {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--neu-in-sm);
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.uc-stat-val { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-dark); }
+.uc-stat-label { font-size: 9.5px; font-family: 'JetBrains Mono', monospace; color: var(--text-light); text-transform: uppercase; margin-top: 2px; }
+
+.uc-actions { display: flex; gap: 8px; }
+
+/* ══════════════════════════════════════════
+   FORM — NEW USER / CREATE SURVEY
+══════════════════════════════════════════ */
+.form-neu {
+  max-width: 640px;
+}
+
+.form-neu-card {
+  background: var(--bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--neu-out-lg);
+  overflow: hidden;
+}
+
+.fnc-head {
+  background: var(--verde);
+  padding: 28px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fnc-head::after {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 130px; height: 130px;
+  border-radius: 50%;
+  border: 30px solid rgba(255,255,255,.06);
+}
+
+.fnc-head-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+.fnc-head-sub { font-size: 13px; color: rgba(255,255,255,.55); margin-top: 4px; }
+
+.fnc-body { padding: 32px; display: flex; flex-direction: column; gap: 20px; }
+
+.fg { display: flex; flex-direction: column; gap: 8px; }
+.fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.fg label {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.fg input, .fg select {
+  background: var(--bg);
+  box-shadow: var(--neu-in);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 16px;
+  outline: none;
+  transition: box-shadow .2s;
+  width: 100%;
+}
+.fg input:focus, .fg select:focus { box-shadow: var(--neu-in), 0 0 0 2px var(--verde-pale); }
+.fg input::placeholder { color: var(--text-light); font-weight: 400; }
+select.fg-sel {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%237a8f6a' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.fnc-foot {
+  padding: 20px 32px;
+  background: var(--bg-dark);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* ══════════════════════════════════════════
+   APPROVALS PAGE
+══════════════════════════════════════════ */
+.approvals-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 22px;
+}
+
+.approval-item-card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: box-shadow .2s;
+}
+.approval-item-card:hover { box-shadow: var(--neu-out-lg); }
+
+.ai-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.ai-title { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; color: var(--text-dark); }
+.ai-meta { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); margin-bottom: 16px; }
+
+.ai-preview {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--neu-in);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.aip-label { font-size: 10px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .8px; color: var(--text-light); margin-bottom: 10px; }
+.aip-dates { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed rgba(0,0,0,.07); }
+.aip-q { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text); padding: 5px 0; }
+
+.ai-comment {
+  width: 100%;
+  background: var(--bg);
+  box-shadow: var(--neu-in);
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Nunito', sans-serif;
+  font-size: 13.5px;
+  color: var(--text);
+  padding: 11px 15px;
+  outline: none;
+  margin-bottom: 14px;
+  transition: box-shadow .2s;
+  font-weight: 500;
+}
+.ai-comment:focus { box-shadow: var(--neu-in), 0 0 0 2px var(--verde-pale); }
+.ai-comment::placeholder { color: var(--text-light); font-weight: 400; }
+
+.ai-btns { display: flex; gap: 12px; }
+
+.hist-neu {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  overflow: hidden;
+  position: sticky;
+  top: 80px;
+}
+
+.hn-head { padding: 20px 20px 0; }
+.hn-title { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: var(--text-dark); }
+
+.hn-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 14px 16px 0;
+}
+
+.hn-tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--bg);
+  box-shadow: var(--neu-out);
+}
+.hn-tab.active { background: var(--verde); color: white; box-shadow: 3px 3px 8px rgba(45,80,22,.3); }
+
+.hn-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+
+.hn-item {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--neu-out);
+  padding: 12px 13px;
+  cursor: pointer;
+  transition: box-shadow .2s;
+}
+.hn-item:hover { box-shadow: var(--neu-out-lg); }
+
+.hn-name { font-size: 12.5px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+.hn-meta { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+/* ══════════════════════════════════════════
+   STATS PAGE
+══════════════════════════════════════════ */
+.stats-layout { display: flex; flex-direction: column; gap: 22px; }
+
+.stats-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.gauge-card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.gauge-circle {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  box-shadow: var(--neu-out-lg);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+.gauge-inner {
+  width: 66px; height: 66px;
+  border-radius: 50%;
+  box-shadow: var(--neu-in);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge-val { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-dark); line-height: 1; }
+.gauge-unit { font-size: 9px; font-family: 'JetBrains Mono', monospace; color: var(--text-light); text-transform: uppercase; }
+
+.gauge-info {}
+.gauge-name { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+.gauge-sub  { font-size: 12px; color: var(--text-muted); }
+
+.stats-bottom {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 22px;
+}
+
+.scatter-card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+}
+
+.sc-dots {
+  height: 160px;
+  position: relative;
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--neu-in);
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.dot {
+  position: absolute;
+  border-radius: 50%;
+  box-shadow: var(--neu-out);
+  cursor: pointer;
+  transition: transform .15s;
+}
+.dot:hover { transform: scale(1.4); }
+
+.ranking-card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+}
+
+.rank-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--neu-out);
+  padding: 12px 14px;
+}
+
+.rank-num {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-light);
+  width: 26px;
+  flex-shrink: 0;
+}
+
+.rank-num.gold   { color: var(--oro-bright); }
+.rank-num.silver { color: #9eaab4; }
+.rank-num.bronze { color: #b58a6a; }
+
+.rank-name { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+.rank-meta { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+.rank-val  { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--verde); }
+
+/* ══════════════════════════════════════════
+   LOG PAGE
+══════════════════════════════════════════ */
+.log-layout { display: flex; flex-direction: column; gap: 22px; }
+
+.log-list { display: flex; flex-direction: column; gap: 12px; }
+
+.log-item-card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 16px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: box-shadow .2s;
+  cursor: pointer;
+}
+.log-item-card:hover { box-shadow: var(--neu-out-lg); }
+
+.log-icon {
+  width: 42px; height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  box-shadow: var(--neu-out);
+}
+
+.li-auth   { background: var(--bg); }
+.li-user   { background: var(--bg); }
+.li-survey { background: var(--bg); }
+
+.log-type-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  box-shadow: var(--neu-out);
+  margin-bottom: 5px;
+}
+
+.lc-auth   { color: var(--blue); }
+.lc-user   { color: var(--verde); }
+.lc-survey { color: var(--oro); }
+
+.log-title   { font-size: 13.5px; font-weight: 700; color: var(--text-dark); }
+.log-meta    { font-size: 11.5px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); margin-top: 2px; }
+.log-time    { margin-left: auto; font-size: 11.5px; font-family: 'JetBrains Mono', monospace; color: var(--text-light); white-space: nowrap; padding-top: 2px; }
+
+.live-neu {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--neu-out);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--red);
+  font-family: 'JetBrains Mono', monospace;
+}
+.live-neu-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: breathe 1.5s infinite; }
+
+/* ══════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: var(--verde-pale); border-radius: 999px; }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════ TOP NAV ════════════════ -->
+<nav class="topnav">
+  <div class="brand">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="brand-name">SIEI – UAEMex</div>
+      <div class="brand-sub">Sistema Integral de Encuestas</div>
+    </div>
+  </div>
+
+  <div class="nav-pills">
+    <div class="nav-pill" onclick="switchPage('dashboard',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-pill active" onclick="switchPage('surveys',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Encuestas
+    </div>
+    <div class="nav-pill" onclick="switchPage('users',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Usuarios
+    </div>
+    <div class="nav-pill" onclick="switchPage('approvals',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Aprobaciones
+      <span class="nav-badge">1</span>
+    </div>
+    <div class="nav-pill" onclick="switchPage('stats',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Estadísticas
+    </div>
+    <div class="nav-pill" onclick="switchPage('log',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h7"/></svg>
+      Bitácora
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="status-chip">
+      <div class="status-led"></div>
+      Sistema operando
+    </div>
+    <div class="avatar-btn">AL</div>
+  </div>
+</nav>
+
+<!-- ════════════════ WRAPPER ════════════════ -->
+<div class="wrapper">
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<section class="page" id="dashboard">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-label">Vista General</div>
+      <div class="ph-title">Panel de Control</div>
+      <div class="ph-sub">Bienvenido de vuelta, Alexis — 25 de febrero de 2026</div>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-neu">↓ Exportar</button>
+      <button class="btn btn-oro">⬡ Generar Reporte</button>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kp-top">
+          <div class="kp-icon"><span>📋</span></div>
+          <span class="kp-change kp-up">↑ +100%</span>
+        </div>
+        <div class="kp-value">9</div>
+        <div class="kp-label">Encuestas</div>
+        <div class="kp-desc">Activas este periodo</div>
+        <div class="kpi-card-bg" style="background:var(--verde)"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kp-top">
+          <div class="kp-icon"><span>📬</span></div>
+          <span class="kp-change kp-up">↑ 0.9/enc</span>
+        </div>
+        <div class="kp-value">8</div>
+        <div class="kp-label">Respuestas</div>
+        <div class="kp-desc">Totales recibidas</div>
+        <div class="kpi-card-bg" style="background:var(--oro)"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kp-top">
+          <div class="kp-icon"><span>✅</span></div>
+          <span class="kp-change kp-flat">— Sin datos</span>
+        </div>
+        <div class="kp-value">0%</div>
+        <div class="kp-label">Completado</div>
+        <div class="kp-desc">Tasa de finalización</div>
+        <div class="kpi-card-bg" style="background:var(--text-muted)"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kp-top">
+          <div class="kp-icon"><span>👤</span></div>
+          <span class="kp-change kp-up">↑ Activos</span>
+        </div>
+        <div class="kp-value">3</div>
+        <div class="kp-label">Usuarios</div>
+        <div class="kp-desc">Con acceso activo</div>
+        <div class="kpi-card-bg" style="background:var(--verde)"></div>
+      </div>
+    </div>
+
+    <!-- Welcome -->
+    <div class="welcome-band">
+      <div class="wb-circles"></div>
+      <div class="wb-circles2"></div>
+      <div>
+        <div class="wb-tag">UAEMex · SIEI 2026</div>
+        <div class="wb-title">¡Buenas tardes, Alexis! 👋</div>
+        <div class="wb-sub">Tienes 1 encuesta pendiente de aprobación y el sistema está funcionando al 100%.</div>
+        <div style="margin-top:16px; display:flex; gap:10px;">
+          <button class="btn btn-oro btn-sm" onclick="switchPage('approvals', document.querySelector('.nav-pill:nth-child(4)'))">Ver aprobaciones →</button>
+        </div>
+      </div>
+      <div class="wb-date">
+        <div class="wb-date-day">25</div>
+        <div class="wb-date-rest">FEB / 2026<br>10:19 AM</div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="quick-actions">
+      <div class="qa-title">Acciones Rápidas</div>
+      <div class="qa-grid">
+        <div class="qa-item" onclick="switchPage('surveys', document.querySelector('.nav-pill:nth-child(2)'))">
+          <div class="qa-emoji">📝</div>
+          <div class="qa-label">Nueva Encuesta</div>
+        </div>
+        <div class="qa-item" onclick="switchPage('users', document.querySelector('.nav-pill:nth-child(3)'))">
+          <div class="qa-emoji">👥</div>
+          <div class="qa-label">Añadir Usuario</div>
+        </div>
+        <div class="qa-item" onclick="switchPage('stats', document.querySelector('.nav-pill:nth-child(5)'))">
+          <div class="qa-emoji">📊</div>
+          <div class="qa-label">Ver Estadísticas</div>
+        </div>
+        <div class="qa-item" onclick="switchPage('log', document.querySelector('.nav-pill:nth-child(6)'))">
+          <div class="qa-emoji">📜</div>
+          <div class="qa-label">Bitácora</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-card">
+      <div class="cc-header">
+        <div>
+          <div class="cc-title">Respuestas por Período</div>
+          <div class="cc-sub">Actividad acumulada del sistema</div>
+        </div>
+        <div class="tab-group">
+          <div class="tg-tab">7D</div>
+          <div class="tg-tab active">30D</div>
+          <div class="tg-tab">90D</div>
+          <div class="tg-tab">1A</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div class="cb-bar-wrap"><div class="cb-bar verde" style="height:25%"></div><span class="cb-month">Ene</span></div>
+        <div class="cb-bar-wrap"><div class="cb-bar oro"   style="height:48%"></div><span class="cb-month">Feb</span></div>
+        <div class="cb-bar-wrap"><div class="cb-bar verde" style="height:35%"></div><span class="cb-month">Mar</span></div>
+        <div class="cb-bar-wrap"><div class="cb-bar oro"   style="height:70%"></div><span class="cb-month">Abr</span></div>
+        <div class="cb-bar-wrap"><div class="cb-bar verde" style="height:52%"></div><span class="cb-month">May</span></div>
+        <div class="cb-bar-wrap"><div class="cb-bar oro"   style="height:88%"></div><span class="cb-month">Jun</span></div>
+        <div class="cb-bar-wrap"><div class="cb-bar verde" style="height:61%"></div><span class="cb-month">Jul</span></div>
+        <div class="cb-bar-wrap"><div class="cb-bar oro"   style="height:44%"></div><span class="cb-month">Ago</span></div>
+        <div class="cb-bar-wrap"><div class="cb-bar verde" style="height:77%"></div><span class="cb-month">Sep</span></div>
+        <div class="cb-bar-wrap"><div class="cb-bar oro"   style="height:33%"></div><span class="cb-month">Oct</span></div>
+      </div>
+    </div>
+
+    <!-- Donut -->
+    <div class="donut-card">
+      <div class="cc-title">Estado de Encuestas</div>
+      <div class="cc-sub" style="font-size:12px;color:var(--text-muted);margin-top:2px">Distribución actual</div>
+      <div class="donut-wrap">
+        <div class="donut-svg-wrap">
+          <svg class="donut-svg" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="#dde3d6" stroke-width="5"/>
+            <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="var(--verde)" stroke-width="5" stroke-dasharray="55 45" stroke-dashoffset="0"/>
+            <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="var(--oro-bright)" stroke-width="5" stroke-dasharray="30 70" stroke-dashoffset="-55"/>
+            <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="var(--text-light)" stroke-width="5" stroke-dasharray="15 85" stroke-dashoffset="-85"/>
+          </svg>
+          <div class="donut-center">
+            <div class="donut-pct">9</div>
+            <div class="donut-pct-label">Total</div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="dl-row"><div class="dl-dot" style="background:var(--verde)"></div>Activas<div class="dl-val">5</div></div>
+          <div class="dl-row"><div class="dl-dot" style="background:var(--oro-bright)"></div>Pendientes<div class="dl-val">3</div></div>
+          <div class="dl-row"><div class="dl-dot" style="background:var(--text-light)"></div>Cerradas<div class="dl-val">1</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-card">
+      <div class="cc-title">Participación por Encuesta</div>
+      <div class="cc-sub" style="font-size:12px;color:var(--text-muted);margin-top:2px">Respuestas vs. límite</div>
+      <div class="pw-items">
+        <div class="pw-item">
+          <div class="pw-item-top"><span class="pw-name">Jajaja</span><span class="pw-pct">1%</span></div>
+          <div class="pw-track"><div class="pw-fill verde" style="width:1%"></div></div>
+        </div>
+        <div class="pw-item">
+          <div class="pw-item-top"><span class="pw-name">regresa alexis</span><span class="pw-pct">7%</span></div>
+          <div class="pw-track"><div class="pw-fill oro" style="width:7%"></div></div>
+        </div>
+        <div class="pw-item">
+          <div class="pw-item-top"><span class="pw-name">prueba 1</span><span class="pw-pct">0%</span></div>
+          <div class="pw-track"><div class="pw-fill mix" style="width:0%"></div></div>
+        </div>
+        <div class="pw-item">
+          <div class="pw-item-top"><span class="pw-name">Datos</span><span class="pw-pct">45%</span></div>
+          <div class="pw-track"><div class="pw-fill verde" style="width:45%"></div></div>
+        </div>
+        <div class="pw-item">
+          <div class="pw-item-top"><span class="pw-name">Naa</span><span class="pw-pct">82%</span></div>
+          <div class="pw-track"><div class="pw-fill oro" style="width:82%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="heatmap-card">
+      <div class="cc-title">Mapa de Actividad</div>
+      <div class="cc-sub" style="font-size:12px;color:var(--text-muted);margin-top:2px">Acciones por día (últimas 5 semanas)</div>
+      <div class="hm-grid">
+        <div class="hm-day-label">L</div><div class="hm-day-label">M</div><div class="hm-day-label">X</div><div class="hm-day-label">J</div><div class="hm-day-label">V</div><div class="hm-day-label">S</div><div class="hm-day-label">D</div>
+        <div class="hm-cell hm-1"></div><div class="hm-cell hm-0"></div><div class="hm-cell hm-2"></div><div class="hm-cell hm-1"></div><div class="hm-cell hm-3"></div><div class="hm-cell hm-0"></div><div class="hm-cell hm-0"></div>
+        <div class="hm-cell hm-2"></div><div class="hm-cell hm-3"></div><div class="hm-cell hm-1"></div><div class="hm-cell hm-4"></div><div class="hm-cell hm-2"></div><div class="hm-cell hm-0"></div><div class="hm-cell hm-0"></div>
+        <div class="hm-cell hm-3"></div><div class="hm-cell hm-1"></div><div class="hm-cell hm-2"></div><div class="hm-cell hm-3"></div><div class="hm-cell hm-1"></div><div class="hm-cell hm-0"></div><div class="hm-cell hm-0"></div>
+        <div class="hm-cell hm-1"></div><div class="hm-cell hm-4"></div><div class="hm-cell hm-3"></div><div class="hm-cell hm-2"></div><div class="hm-cell hm-4"></div><div class="hm-cell hm-1"></div><div class="hm-cell hm-0"></div>
+        <div class="hm-cell hm-2"></div><div class="hm-cell hm-3"></div><div class="hm-cell hm-4"></div><div class="hm-cell hm-2"></div><div class="hm-cell hm-3"></div><div class="hm-cell hm-0"></div><div class="hm-cell hm-0"></div>
+      </div>
+    </div>
+
+    <!-- Recent surveys -->
+    <div class="table-card">
+      <div class="cc-title">Encuestas Recientes</div>
+      <div class="rc-list">
+        <div class="rc-item">
+          <div class="rc-top"><span class="rc-name">Jajaja</span><span class="badge-neu bn-green">● Activa</span></div>
+          <div class="rc-bar-wrap"><div class="rc-mini-bar"><div class="rc-mini-fill" style="width:10%"></div></div><span class="rc-num">1/100 resp.</span></div>
+        </div>
+        <div class="rc-item">
+          <div class="rc-top"><span class="rc-name">regresa alexis</span><span class="badge-neu bn-green">● Activa</span></div>
+          <div class="rc-bar-wrap"><div class="rc-mini-bar"><div class="rc-mini-fill" style="width:7%"></div></div><span class="rc-num">7/100 resp.</span></div>
+        </div>
+        <div class="rc-item">
+          <div class="rc-top"><span class="rc-name">prueba 1</span><span class="badge-neu bn-gold">○ Pendiente</span></div>
+          <div class="rc-bar-wrap"><div class="rc-mini-bar"><div class="rc-mini-fill" style="width:0%"></div></div><span class="rc-num">0/100 resp.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-card">
+      <div class="cc-title">Actividad Reciente</div>
+      <div class="tl-list">
+        <div class="tl-line"></div>
+        <div class="tl-item"><div class="tl-dot">🔐</div><div class="tl-content"><div class="tl-action">Inicio de sesión</div><div class="tl-meta">Alexis Crisantos · Ahora</div></div></div>
+        <div class="tl-item"><div class="tl-dot">📝</div><div class="tl-content"><div class="tl-action">Encuesta creada: "Jajaja"</div><div class="tl-meta">Alexis Crisantos · hace 9 días</div></div></div>
+        <div class="tl-item"><div class="tl-dot">📤</div><div class="tl-content"><div class="tl-action">Enviada a aprobación: "prueba 1"</div><div class="tl-meta">Lucerito Bb · hace 8 días</div></div></div>
+        <div class="tl-item"><div class="tl-dot">✅</div><div class="tl-content"><div class="tl-action">Aprobada: "regresa alexis"</div><div class="tl-meta">Alexis Crisantos · hace 12 días</div></div></div>
+        <div class="tl-item"><div class="tl-dot">👤</div><div class="tl-content"><div class="tl-action">Nuevo usuario: Ramirez Lzrga</div><div class="tl-meta">Sistema · hace 14 días</div></div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════ SURVEYS ═══════════ -->
+<section class="page active" id="surveys">
+  <div class="ph">
+    <div>
+      <div class="ph-label">Gestión</div>
+      <div class="ph-title">Encuestas Globales</div>
+      <div class="ph-sub">Administra y monitorea todas las encuestas del sistema</div>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-solid">+ Nueva Encuesta</button>
+    </div>
+  </div>
+
+  <div class="surveys-layout">
+    <div class="filter-neu">
+      <span class="fn-label">Desde:</span>
+      <input type="date" class="fn-input" style="width:145px">
+      <span class="fn-label">Estado:</span>
+      <select class="fn-input" style="width:135px"><option>Todas</option><option>Activa</option><option>Pendiente</option><option>Cerrada</option></select>
+      <div class="fn-search"><span class="fn-search-icon">🔍</span><input type="text" class="fn-input" placeholder="Buscar encuesta..."></div>
+      <button class="btn btn-neu btn-sm">↺ Limpiar</button>
+    </div>
+
+    <div class="surveys-grid">
+
+      <div class="survey-card">
+        <div class="sc-banner activa"></div>
+        <div class="sc-body">
+          <div class="sc-top">
+            <div><div class="sc-name">Jajaja</div><div class="sc-desc">Respondela</div></div>
+            <span class="badge-neu bn-green">● Activa</span>
+          </div>
+          <div class="sc-stats">
+            <div class="sc-stat"><div class="sc-stat-val">1</div><div class="sc-stat-label">Resp.</div></div>
+            <div class="sc-stat"><div class="sc-stat-val">3</div><div class="sc-stat-label">Preg.</div></div>
+            <div class="sc-stat"><div class="sc-stat-val">1%</div><div class="sc-stat-label">Comp.</div></div>
+          </div>
+          <div class="sc-author"><div class="sc-avatar">A</div><span>ALEXIS CRISANTOS · 16/02/2026</span></div>
+          <div class="sc-actions">
+            <button class="sc-btn">↗ Abrir</button>
+            <button class="sc-btn">👁 Ver</button>
+            <button class="sc-btn">✏ Editar</button>
+            <button class="sc-btn del">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="survey-card">
+        <div class="sc-banner activa"></div>
+        <div class="sc-body">
+          <div class="sc-top">
+            <div><div class="sc-name">regresa alexis regresa</div><div class="sc-desc">Sin descripción</div></div>
+            <span class="badge-neu bn-green">● Activa</span>
+          </div>
+          <div class="sc-stats">
+            <div class="sc-stat"><div class="sc-stat-val">7</div><div class="sc-stat-label">Resp.</div></div>
+            <div class="sc-stat"><div class="sc-stat-val">2</div><div class="sc-stat-label">Preg.</div></div>
+            <div class="sc-stat"><div class="sc-stat-val">7%</div><div class="sc-stat-label">Comp.</div></div>
+          </div>
+          <div class="sc-author"><div class="sc-avatar">A</div><span>ALEXIS CRISANTOS · 10/02/2026</span></div>
+          <div class="sc-actions">
+            <button class="sc-btn">↗ Abrir</button>
+            <button class="sc-btn">👁 Ver</button>
+            <button class="sc-btn">✏ Editar</button>
+            <button class="sc-btn del">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="survey-card">
+        <div class="sc-banner pendiente"></div>
+        <div class="sc-body">
+          <div class="sc-top">
+            <div><div class="sc-name">prueba 1</div><div class="sc-desc">En revisión editorial</div></div>
+            <span class="badge-neu bn-gold">○ Pendiente</span>
+          </div>
+          <div class="sc-stats">
+            <div class="sc-stat"><div class="sc-stat-val">0</div><div class="sc-stat-label">Resp.</div></div>
+            <div class="sc-stat"><div class="sc-stat-val">1</div><div class="sc-stat-label">Preg.</div></div>
+            <div class="sc-stat"><div class="sc-stat-val">—</div><div class="sc-stat-label">Comp.</div></div>
+          </div>
+          <div class="sc-author"><div class="sc-avatar" style="background:var(--oro-bright);color:var(--verde)">L</div><span>Lucerito Bb · 17/02/2026</span></div>
+          <div class="sc-actions">
+            <button class="sc-btn">↗ Abrir</button>
+            <button class="sc-btn">👁 Ver</button>
+            <button class="sc-btn">✏ Editar</button>
+            <button class="sc-btn del">✕</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ USERS ═══════════ -->
+<section class="page" id="users">
+  <div class="ph">
+    <div>
+      <div class="ph-label">Administración</div>
+      <div class="ph-title">Usuarios del Sistema</div>
+      <div class="ph-sub">Gestiona roles, estados y permisos</div>
+    </div>
+    <button class="btn btn-solid">+ Nuevo Usuario</button>
+  </div>
+
+  <div class="users-grid">
+
+    <div class="user-card">
+      <div class="uc-avatar" style="background:var(--verde);color:var(--oro-bright)">R</div>
+      <div class="uc-name">Ramirez Lzrga</div>
+      <div class="uc-email">car@gmail.com</div>
+      <div class="uc-tags">
+        <span class="badge-neu" style="color:var(--blue);font-size:11px">Editor</span>
+        <span class="badge-neu" style="color:var(--green);font-size:11px">● Activo</span>
+      </div>
+      <div class="uc-stats">
+        <div class="uc-stat"><div class="uc-stat-val">2</div><div class="uc-stat-label">Encuestas</div></div>
+        <div class="uc-stat"><div class="uc-stat-val">8</div><div class="uc-stat-label">Acciones</div></div>
+      </div>
+      <div class="uc-actions">
+        <button class="btn btn-neu btn-sm" style="flex:1">✏ Editar</button>
+        <button class="btn btn-neu btn-sm btn-icon" style="color:var(--red)">🗑</button>
+      </div>
+    </div>
+
+    <div class="user-card">
+      <div class="uc-avatar" style="background:var(--verde);color:var(--oro-bright)">A</div>
+      <div class="uc-name">ALEXIS CRISANTOS</div>
+      <div class="uc-email">rich@gmail.com</div>
+      <div class="uc-tags">
+        <span class="badge-neu" style="color:var(--verde);font-size:11px">Administrador</span>
+        <span class="badge-neu" style="color:var(--green);font-size:11px">● Activo</span>
+      </div>
+      <div class="uc-stats">
+        <div class="uc-stat"><div class="uc-stat-val">9</div><div class="uc-stat-label">Encuestas</div></div>
+        <div class="uc-stat"><div class="uc-stat-val">47</div><div class="uc-stat-label">Acciones</div></div>
+      </div>
+      <div class="uc-actions">
+        <button class="btn btn-neu btn-sm" style="flex:1">✏ Editar</button>
+        <button class="btn btn-neu btn-sm btn-icon" style="color:var(--red)">🗑</button>
+      </div>
+    </div>
+
+    <div class="user-card">
+      <div class="uc-avatar" style="background:var(--oro-bright);color:var(--verde)">L</div>
+      <div class="uc-name">Lucerito Bb</div>
+      <div class="uc-email">lucero@gmail.com</div>
+      <div class="uc-tags">
+        <span class="badge-neu" style="color:var(--blue);font-size:11px">Editor</span>
+        <span class="badge-neu" style="color:var(--green);font-size:11px">● Activo</span>
+      </div>
+      <div class="uc-stats">
+        <div class="uc-stat"><div class="uc-stat-val">3</div><div class="uc-stat-label">Encuestas</div></div>
+        <div class="uc-stat"><div class="uc-stat-val">14</div><div class="uc-stat-label">Acciones</div></div>
+      </div>
+      <div class="uc-actions">
+        <button class="btn btn-neu btn-sm" style="flex:1">✏ Editar</button>
+        <button class="btn btn-neu btn-sm btn-icon" style="color:var(--red)">🗑</button>
+      </div>
+    </div>
+
+    <div class="user-card" style="opacity:.7">
+      <div class="uc-avatar" style="background:var(--bg-dark);color:var(--text-muted)">C</div>
+      <div class="uc-name" style="color:var(--text-muted)">caguamo</div>
+      <div class="uc-email">cagua@gmail.com</div>
+      <div class="uc-tags">
+        <span class="badge-neu" style="color:var(--text-muted);font-size:11px">Sin rol</span>
+        <span class="badge-neu" style="color:var(--red);font-size:11px">● Inactivo</span>
+      </div>
+      <div class="uc-stats">
+        <div class="uc-stat"><div class="uc-stat-val">0</div><div class="uc-stat-label">Encuestas</div></div>
+        <div class="uc-stat"><div class="uc-stat-val">0</div><div class="uc-stat-label">Acciones</div></div>
+      </div>
+      <div class="uc-actions">
+        <button class="btn btn-neu btn-sm" style="flex:1">✏ Editar</button>
+        <button class="btn btn-neu btn-sm btn-icon" style="color:var(--red)">🗑</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════ APPROVALS ═══════════ -->
+<section class="page" id="approvals">
+  <div class="ph">
+    <div>
+      <div class="ph-label">Flujo Editorial</div>
+      <div class="ph-title">Sistema de Aprobaciones</div>
+      <div class="ph-sub">Revisa y gestiona las encuestas pendientes de publicación</div>
+    </div>
+  </div>
+
+  <div class="approvals-layout">
+    <div>
+      <div class="approval-item-card">
+        <div class="ai-top">
+          <div class="ai-title">prueba 1</div>
+          <span class="badge-neu bn-gold">○ Pendiente</span>
+        </div>
+        <div class="ai-meta">Propietario: Lucerito Bb · Creada hace 1 semana</div>
+
+        <div class="ai-preview">
+          <div class="aip-label">Preview de la encuesta</div>
+          <div class="aip-dates">📅 17/02/2026 – 17/03/2026 &nbsp;·&nbsp; 📋 1 pregunta</div>
+          <div class="aip-q">
+            <span>1. que es algoritmo</span>
+            <span class="badge-neu bn-muted" style="font-size:10px">MULTIPLE CHOICE</span>
+          </div>
+        </div>
+
+        <input class="ai-comment" placeholder="Comentario para el editor (opcional)...">
+
+        <div class="ai-btns">
+          <button class="btn btn-neu" style="flex:1;color:var(--red)">✕ Rechazar</button>
+          <button class="btn btn-solid" style="flex:1">✓ Aprobar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hist-neu">
+      <div class="hn-head" style="padding-bottom:0">
+        <div class="hn-title">Historial de aprobaciones</div>
+      </div>
+      <div class="hn-tabs">
+        <div class="hn-tab active">Pendientes</div>
+        <div class="hn-tab">Aprobadas</div>
+        <div class="hn-tab">Rechazadas</div>
+      </div>
+      <div class="hn-list">
+        <div class="hn-item">
+          <div class="hn-name">regresa alexis regresa</div>
+          <div class="hn-meta"><span class="badge-neu bn-green" style="font-size:10px">✓ Aprobada</span> · ALEXIS · 1sem</div>
+        </div>
+        <div class="hn-item">
+          <div class="hn-name">Elige la mejor cancion</div>
+          <div class="hn-meta"><span class="badge-neu bn-green" style="font-size:10px">✓ Aprobada</span> · ALEXIS · 1sem</div>
+        </div>
+        <div class="hn-item">
+          <div class="hn-name">Datos</div>
+          <div class="hn-meta"><span class="badge-neu bn-green" style="font-size:10px">✓ Aprobada</span> · ALEXIS · 1sem</div>
+        </div>
+        <div class="hn-item">
+          <div class="hn-name">Naa</div>
+          <div class="hn-meta"><span class="badge-neu bn-green" style="font-size:10px">✓ Aprobada</span> · ALEXIS · 2sem</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ STATS ═══════════ -->
+<section class="page" id="stats">
+  <div class="ph">
+    <div>
+      <div class="ph-label">Análisis</div>
+      <div class="ph-title">Estadísticas del Sistema</div>
+      <div class="ph-sub">Métricas de respuestas, participación y tendencias</div>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-neu">⬡ Exportar</button>
+    </div>
+  </div>
+
+  <div class="stats-layout">
+    <div class="filter-neu">
+      <span class="fn-label">Encuesta:</span>
+      <select class="fn-input" style="width:240px"><option>regresa alexis regresa (2026)</option><option>Jajaja</option><option>prueba 1</option></select>
+      <span class="fn-label">Desde:</span>
+      <input type="date" class="fn-input" style="width:145px">
+      <span class="fn-label">Hasta:</span>
+      <input type="date" class="fn-input" style="width:145px">
+      <button class="btn btn-solid btn-sm">▼ Aplicar</button>
+    </div>
+
+    <div class="stats-top">
+      <div class="gauge-card">
+        <div class="gauge-circle"><div class="gauge-inner"><div class="gauge-val">0</div><div class="gauge-unit">Resp.</div></div></div>
+        <div class="gauge-info">
+          <div class="gauge-name">Total de Respuestas</div>
+          <div class="gauge-sub">Periodo seleccionado</div>
+          <div style="margin-top:10px"><span class="kp-change kp-up" style="display:inline-flex">↑ 0% vs año anterior</span></div>
+        </div>
+      </div>
+      <div class="gauge-card">
+        <div class="gauge-circle"><div class="gauge-inner"><div class="gauge-val">0%</div><div class="gauge-unit">Comp.</div></div></div>
+        <div class="gauge-info">
+          <div class="gauge-name">Tasa de Completado</div>
+          <div class="gauge-sub">Encuestas finalizadas</div>
+          <div style="margin-top:10px"><span class="kp-change kp-flat" style="display:inline-flex">— Sin variación</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-bottom">
+      <div class="scatter-card">
+        <div class="cc-title">Distribución de Respuestas por Día</div>
+        <div class="sc-dots">
+          <div class="dot" style="width:18px;height:18px;background:var(--verde);left:8%;bottom:30%"></div>
+          <div class="dot" style="width:24px;height:24px;background:var(--oro-bright);left:20%;bottom:60%"></div>
+          <div class="dot" style="width:12px;height:12px;background:var(--verde-mid);left:35%;bottom:45%"></div>
+          <div class="dot" style="width:30px;height:30px;background:var(--verde);left:50%;bottom:70%"></div>
+          <div class="dot" style="width:16px;height:16px;background:var(--oro);left:65%;bottom:35%"></div>
+          <div class="dot" style="width:22px;height:22px;background:var(--verde-mid);left:80%;bottom:55%"></div>
+          <div class="dot" style="width:14px;height:14px;background:var(--oro-bright);left:90%;bottom:20%"></div>
+        </div>
+      </div>
+      <div class="ranking-card">
+        <div class="cc-title">Top Encuestas</div>
+        <div class="rank-list">
+          <div class="rank-item"><div class="rank-num gold">1</div><div><div class="rank-name">regresa alexis</div><div class="rank-meta">7 respuestas</div></div><div class="rank-val">7</div></div>
+          <div class="rank-item"><div class="rank-num silver">2</div><div><div class="rank-name">Jajaja</div><div class="rank-meta">1 respuesta</div></div><div class="rank-val">1</div></div>
+          <div class="rank-item"><div class="rank-num bronze">3</div><div><div class="rank-name">prueba 1</div><div class="rank-meta">0 respuestas</div></div><div class="rank-val">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ LOG ═══════════ -->
+<section class="page" id="log">
+  <div class="ph">
+    <div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:5px">
+        <div class="ph-label" style="margin:0">Auditoría</div>
+        <div class="live-neu"><div class="live-neu-dot"></div>En vivo</div>
+      </div>
+      <div class="ph-title">Bitácora de Actividades</div>
+      <div class="ph-sub">Registro completo de todas las acciones en el sistema</div>
+    </div>
+    <button class="btn btn-neu">📤 Exportar</button>
+  </div>
+
+  <div class="log-layout">
+    <div class="filter-neu">
+      <span class="fn-label">Período:</span>
+      <select class="fn-input" style="width:140px"><option>Hoy</option><option>Esta semana</option><option>Este mes</option></select>
+      <span class="fn-label">Tipo:</span>
+      <select class="fn-input" style="width:140px"><option>Todas</option><option>Auth</option><option>User</option><option>Survey</option></select>
+      <button class="btn btn-solid btn-sm">Aplicar</button>
+    </div>
+
+    <div class="log-list">
+      <div class="log-item-card">
+        <div class="log-icon li-auth">🔐</div>
+        <div>
+          <div class="log-type-chip lc-auth">AUTH</div>
+          <div class="log-title">Inicio de sesión exitoso</div>
+          <div class="log-meta">ALEXIS CRISANTOS · rich@gmail.com · IP: 127.0.0.1</div>
+        </div>
+        <div class="log-time">25/02/2026<br>04:18 pm</div>
+      </div>
+      <div class="log-item-card">
+        <div class="log-icon li-auth">🔐</div>
+        <div>
+          <div class="log-type-chip lc-auth">AUTH</div>
+          <div class="log-title">Inicio de sesión exitoso</div>
+          <div class="log-meta">Ramirez Lzrga · car@gmail.com · IP: 127.0.0.1</div>
+        </div>
+        <div class="log-time">25/02/2026<br>04:02 pm</div>
+      </div>
+      <div class="log-item-card">
+        <div class="log-icon li-user">👤</div>
+        <div>
+          <div class="log-type-chip lc-user">USER</div>
+          <div class="log-title">Nuevo usuario registrado</div>
+          <div class="log-meta">caguamo · cagua@gmail.com · IP: 127.0.0.1</div>
+        </div>
+        <div class="log-time">24/02/2026<br>08:24 pm</div>
+      </div>
+      <div class="log-item-card">
+        <div class="log-icon li-auth">🚪</div>
+        <div>
+          <div class="log-type-chip lc-auth">AUTH</div>
+          <div class="log-title">Cierre de sesión</div>
+          <div class="log-meta">ALEXIS CRISANTOS · rich@gmail.com · IP: 127.0.0.1</div>
+        </div>
+        <div class="log-time">24/02/2026<br>06:51 pm</div>
+      </div>
+      <div class="log-item-card">
+        <div class="log-icon li-survey">📋</div>
+        <div>
+          <div class="log-type-chip lc-survey">SURVEY</div>
+          <div class="log-title">Encuesta enviada a aprobación</div>
+          <div class="log-meta">prueba 1 · Lucerito Bb · IP: 127.0.0.1</div>
+        </div>
+        <div class="log-time">23/02/2026<br>03:33 pm</div>
+      </div>
+      <div class="log-item-card">
+        <div class="log-icon li-survey">✅</div>
+        <div>
+          <div class="log-type-chip lc-survey">SURVEY</div>
+          <div class="log-title">Encuesta aprobada y publicada</div>
+          <div class="log-meta">regresa alexis regresa · ALEXIS CRISANTOS · IP: 127.0.0.1</div>
+        </div>
+        <div class="log-time">23/02/2026<br>12:10 pm</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrapper -->
+
+<script>
+function switchPage(id, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Tab groups
+document.querySelectorAll('.tg-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    t.closest('.tab-group').querySelectorAll('.tg-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+
+// History tabs
+document.querySelectorAll('.hn-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    t.closest('.hn-tabs').querySelectorAll('.hn-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+
+// Approval history tabs
+document.querySelectorAll('.htab').forEach(t => {
+  t.addEventListener('click', () => {
+    t.closest('.hist-tabs')?.querySelectorAll('.htab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
