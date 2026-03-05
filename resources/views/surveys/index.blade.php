@@ -91,7 +91,7 @@
                         <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                     </svg>
                 </a>
-                <a href="{{ route('surveys.statistics', $survey->id) }}" class="btn-icon-neu" title="Estadísticas" onclick="event.stopPropagation();">
+                <a href="{{ route('statistics.index', ['survey_id' => $survey->id]) }}" class="btn-icon-neu" title="Estadísticas" onclick="event.stopPropagation();">
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M18 20V10" />
                         <path d="M12 20V4" />
@@ -109,6 +109,6 @@
 </div>
 
 <div class="mt-8">
-    {{ $surveys->links() }}
+    {{ $surveys->withQueryString()->links() }}
 </div>
 @endsection

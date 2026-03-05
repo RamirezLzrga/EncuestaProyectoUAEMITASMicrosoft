@@ -3,95 +3,99 @@
 @section('title', 'Respuestas de Encuesta')
 
 @section('content')
-<div class="welcome-section" style="margin-bottom: 1.5rem;">
-    <div class="welcome-content flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-            <p class="greeting-eyebrow">Respuestas de encuesta</p>
-            <h2 class="greeting">{{ $survey->title }}</h2>
-            <p class="greeting-subtitle">Resumen por pregunta de las respuestas recibidas</p>
-        </div>
-        <div class="flex gap-2">
-            <a href="{{ route('editor.encuestas.editar', $survey) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition">
-                <i class="fas fa-pen"></i>
-                Volver al editor
-            </a>
-            <a href="{{ route('editor.encuestas.compartir', $survey) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-uaemex text-white text-xs font-semibold hover:bg-green-800 transition">
-                <i class="fas fa-share-alt"></i>
-                Compartir encuesta
-            </a>
-        </div>
-    </div>
-</div>
-
-<div class="flex items-center justify-between mb-4" style="display:none;">
+<div class="ph">
     <div>
-        <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold">Respuestas</p>
-        <h1 class="text-2xl font-bold text-gray-100 mt-1">{{ $survey->title }}</h1>
+        <div class="ph-label">Resultados</div>
+        <h1 class="ph-title">{{ $survey->title }}</h1>
+        <div class="ph-sub">Resumen por pregunta de las respuestas recibidas</div>
     </div>
-    <div class="flex gap-2">
-        <a href="{{ route('editor.encuestas.editar', $survey) }}" class="px-4 py-2 rounded-full border border-gray-500/40 text-gray-300 text-xs font-semibold hover:bg-white/5 transition flex items-center gap-2">
+    <div class="ph-actions">
+        <a href="{{ route('editor.encuestas.editar', $survey) }}" class="btn btn-neu btn-sm">
             <i class="fas fa-pen"></i>
             Editor
         </a>
-        <a href="{{ route('editor.encuestas.compartir', $survey) }}" class="px-4 py-2 rounded-full border border-emerald-500/40 text-emerald-300 text-xs font-semibold hover:bg-emerald-500/10 transition flex items-center gap-2">
+        <a href="{{ route('editor.encuestas.compartir', $survey) }}" class="btn btn-solid btn-sm">
             <i class="fas fa-share-alt"></i>
             Compartir
         </a>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-4 gap-5 mb-5">
-    <div class="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-            <span class="text-xs text-gray-400">Total respuestas</span>
-            <i class="fas fa-inbox text-emerald-400"></i>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+    <div class="kpi-card">
+        <div class="kp-top">
+            <div class="kp-icon text-[var(--verde)]"><i class="fas fa-inbox"></i></div>
         </div>
-        <p class="text-2xl font-bold text-gray-100 mt-2">{{ $totalResponses }}</p>
+        <div>
+            <div class="kp-value">{{ $totalResponses }}</div>
+            <div class="kp-label">Total respuestas</div>
+        </div>
     </div>
-    <div class="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-            <span class="text-xs text-gray-400">Tasa de completado</span>
-            <i class="fas fa-percentage text-sky-400"></i>
+    
+    <div class="kpi-card">
+        <div class="kp-top">
+            <div class="kp-icon text-[var(--blue)]"><i class="fas fa-percentage"></i></div>
         </div>
-        <p class="text-2xl font-bold text-gray-100 mt-2">{{ $completionRate }}%</p>
+        <div>
+            <div class="kp-value">{{ $completionRate }}%</div>
+            <div class="kp-label">Tasa completado</div>
+        </div>
     </div>
-    <div class="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-            <span class="text-xs text-gray-400">Tiempo promedio</span>
-            <i class="fas fa-clock text-amber-400"></i>
+
+    <div class="kpi-card">
+        <div class="kp-top">
+            <div class="kp-icon text-[var(--oro)]"><i class="fas fa-clock"></i></div>
         </div>
-        <p class="text-2xl font-bold text-gray-100 mt-2">
-            @if($avgTimeSeconds)
-                {{ $avgTimeSeconds }} s
-            @else
-                N/D
-            @endif
-        </p>
+        <div>
+            <div class="kp-value">
+                @if($avgTimeSeconds)
+                    {{ $avgTimeSeconds }}s
+                @else
+                    --
+                @endif
+            </div>
+            <div class="kp-label">Tiempo promedio</div>
+        </div>
     </div>
-    <div class="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-            <span class="text-xs text-gray-400">Exportar</span>
-            <i class="fas fa-file-export text-fuchsia-400"></i>
+
+    <div class="kpi-card cursor-not-allowed opacity-70">
+        <div class="kp-top">
+            <div class="kp-icon text-[var(--text-muted)]"><i class="fas fa-file-export"></i></div>
         </div>
-        <p class="text-xs text-gray-400 mt-2">Puedes exportar los datos a CSV desde esta vista en una iteración posterior.</p>
+        <div>
+            <div class="kp-value text-xl mt-2 text-[var(--text-muted)]">CSV / PDF</div>
+            <div class="kp-label">Próximamente</div>
+        </div>
     </div>
 </div>
 
-<div class="bg-slate-900/60 border border-white/10 rounded-2xl p-4">
-    <div class="flex border-b border-white/10 mb-4 text-xs">
-        <button class="px-3 py-2 text-emerald-300 border-b-2 border-emerald-400">Resumen</button>
-        <button class="px-3 py-2 text-gray-400 cursor-not-allowed">Individuales</button>
-        <button class="px-3 py-2 text-gray-400 cursor-not-allowed">Análisis</button>
+<div class="nc">
+    <div class="flex items-center gap-2 border-b border-[var(--neu-dark)]/10 pb-4 mb-6">
+        <button class="btn btn-solid btn-sm">
+            Resumen
+        </button>
+        <button class="btn btn-neu btn-sm opacity-60 cursor-not-allowed">
+            Individuales
+        </button>
+        <button class="btn btn-neu btn-sm opacity-60 cursor-not-allowed">
+            Análisis
+        </button>
     </div>
 
-    <div class="space-y-4">
-        <p class="text-xs text-gray-400">Resumen simple por pregunta basado en las respuestas almacenadas.</p>
+    <div class="space-y-8">
         @if($totalResponses === 0)
-            <p class="text-sm text-gray-500">Aún no hay respuestas para esta encuesta.</p>
+            <div class="text-center py-10">
+                <i class="fas fa-inbox text-4xl text-[var(--neu-dark)] mb-3"></i>
+                <p class="text-sm text-[var(--text-muted)]">Aún no hay respuestas para esta encuesta.</p>
+            </div>
         @else
             @foreach($survey->questions as $index => $question)
-                <div class="border border-white/10 rounded-xl p-3 text-xs">
-                    <p class="font-semibold text-gray-100 mb-2">{{ $index + 1 }}. {{ $question['text'] }}</p>
+                <div class="nc-inset">
+                    <p class="font-bold text-[var(--text-dark)] mb-4 text-sm flex items-start gap-2">
+                        <span class="text-[var(--verde)]">{{ $index + 1 }}.</span>
+                        {{ $question['text'] }}
+                    </p>
+                    
                     @if(in_array($question['type'], ['multiple_choice', 'checkboxes']) && !empty($question['options']))
                         @php
                             $counts = [];
@@ -113,24 +117,29 @@
                                 }
                             }
                         @endphp
-                        @foreach($counts as $opt => $count)
-                            @php
-                                $percent = $totalResponses > 0 ? round(($count / $totalResponses) * 100) : 0;
-                            @endphp
-                            <div class="flex items-center gap-2 mb-1">
-                                <div class="flex-1">
-                                    <div class="flex justify-between text-[11px] text-gray-300">
-                                        <span>{{ $opt }}</span>
-                                        <span>{{ $count }} ({{ $percent }}%)</span>
+                        <div class="space-y-3">
+                            @foreach($counts as $opt => $count)
+                                @php
+                                    $percent = $totalResponses > 0 ? round(($count / $totalResponses) * 100) : 0;
+                                @endphp
+                                <div>
+                                    <div class="flex justify-between text-[11px] mb-1">
+                                        <span class="text-[var(--text)] font-semibold">{{ $opt }}</span>
+                                        <span class="text-[var(--text-muted)] font-mono">{{ $count }} ({{ $percent }}%)</span>
                                     </div>
-                                    <div class="w-full h-1.5 rounded-full bg-slate-800 mt-1">
-                                        <div class="h-full rounded-full bg-emerald-500" style="width: {{ $percent }}%"></div>
+                                    <div class="w-full h-2 rounded-full bg-[var(--bg)] shadow-[var(--neu-in-sm)] overflow-hidden">
+                                        <div class="h-full rounded-full bg-[var(--verde)]" style="width: {{ $percent }}%"></div>
                                     </div>
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     @else
-                        <p class="text-gray-400 text-[11px]">Pregunta abierta o de texto. El detalle de respuestas se puede explorar en la pestaña Individuales.</p>
+                        <div class="nc p-4 flex items-center gap-3">
+                            <i class="fas fa-align-left text-[var(--text-muted)]"></i>
+                            <span class="text-[var(--text-muted)] text-xs italic">
+                                Pregunta abierta o de texto. El detalle de respuestas se puede explorar en la pestaña Individuales.
+                            </span>
+                        </div>
                     @endif
                 </div>
             @endforeach

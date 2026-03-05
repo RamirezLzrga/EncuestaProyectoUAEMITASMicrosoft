@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIEI – UAEMex · Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #e8ede2;
+  --bg-dark:     #dde3d6;
+  --bg-light:    #f3f7ee;
+  --neu-dark:    #c4c9be;
+  --neu-light:   #ffffff;
+  --verde:       #2D5016;
+  --verde-mid:   #3a6b1c;
+  --verde-pale:  #c8dbb8;
+  --verde-xpale: #ddebd0;
+  --oro:         #C99A0A;
+  --oro-pale:    #f5e6a3;
+  --oro-bright:  #e0ae12;
+  --text-dark:   #1e2d14;
+  --text:        #3a4a2c;
+  --text-muted:  #7a8f6a;
+  --text-light:  #a5b896;
+  --red:         #c0392b;
+  --red-pale:    #fde8e6;
+  --green:       #1e7e34;
+  --green-pale:  #e2f4e7;
+  --blue:        #1a5299;
+  --blue-pale:   #ddeaf8;
+  --radius-sm:   8px;
+  --radius:      16px;
+  --radius-lg:   24px;
+  --radius-xl:   32px;
+  --neu-out:    6px 6px 14px var(--neu-dark), -6px -6px 14px var(--neu-light);
+  --neu-out-lg: 10px 10px 24px var(--neu-dark), -10px -10px 24px var(--neu-light);
+  --neu-in:     inset 4px 4px 10px var(--neu-dark), inset -4px -4px 10px var(--neu-light);
+  --neu-in-sm:  inset 2px 2px 6px var(--neu-dark), inset -2px -2px 6px var(--neu-light);
+  --neu-press:  inset 5px 5px 12px var(--neu-dark), inset -5px -5px 12px var(--neu-light);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── TOP NAV ── */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: var(--bg); padding: 0 36px; height: 68px;
+  display: flex; align-items: center; gap: 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,.08);
+}
+.brand { display: flex; align-items: center; gap: 14px; margin-right: 40px; flex-shrink: 0; }
+.brand-logo {
+  width: 42px; height: 42px; border-radius: 14px; background: var(--verde);
+  display: grid; place-items: center; box-shadow: var(--neu-out); flex-shrink: 0;
+}
+.brand-logo svg { width: 22px; height: 22px; fill: var(--oro-bright); }
+.brand-name { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: var(--verde); letter-spacing: -.3px; line-height: 1.1; }
+.brand-sub  { font-size: 10.5px; color: var(--text-muted); font-weight: 400; margin-top: 1px; }
+
+.nav-pills {
+  display: flex; align-items: center; gap: 4px; flex: 1;
+  background: var(--bg); border-radius: 999px; padding: 5px;
+  box-shadow: var(--neu-in-sm); max-width: 480px;
+}
+.nav-pill {
+  display: flex; align-items: center; gap: 7px; padding: 8px 16px;
+  border-radius: 999px; font-size: 13px; font-weight: 600;
+  color: var(--text-muted); cursor: pointer; transition: all .2s;
+  white-space: nowrap; user-select: none;
+}
+.nav-pill:hover { color: var(--verde); }
+.nav-pill.active {
+  background: var(--verde); color: white;
+  box-shadow: 4px 4px 10px rgba(45,80,22,.35), -2px -2px 6px rgba(255,255,255,.2);
+}
+.nav-pill svg { width: 15px; height: 15px; flex-shrink: 0; }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.role-chip {
+  padding: 6px 14px; border-radius: 999px; background: var(--bg);
+  box-shadow: var(--neu-out); font-size: 11.5px; font-weight: 700;
+  color: var(--oro); font-family: 'JetBrains Mono', monospace; letter-spacing: .5px;
+}
+.status-chip {
+  display: flex; align-items: center; gap: 7px; padding: 7px 16px;
+  border-radius: 999px; background: var(--bg); box-shadow: var(--neu-out);
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+}
+.status-led { width: 7px; height: 7px; border-radius: 50%; background: #4caf50; box-shadow: 0 0 6px #4caf5099; animation: breathe 2.5s infinite; }
+@keyframes breathe { 0%,100%{ box-shadow: 0 0 6px #4caf5099; } 50%{ box-shadow: 0 0 12px #4caf50cc; } }
+.avatar-btn {
+  width: 42px; height: 42px; border-radius: 50%; background: var(--verde);
+  color: var(--oro-bright); font-family: 'Sora', sans-serif; font-weight: 700;
+  font-size: 14px; display: grid; place-items: center; cursor: pointer;
+  box-shadow: var(--neu-out); transition: box-shadow .2s; flex-shrink: 0;
+  border: 3px solid var(--bg); outline: 3px solid var(--verde-pale);
+}
+.avatar-btn:hover { box-shadow: var(--neu-out-lg); }
+.notif-btn {
+  width: 42px; height: 42px; border-radius: 50%; background: var(--bg);
+  display: grid; place-items: center; cursor: pointer; box-shadow: var(--neu-out);
+  font-size: 18px; transition: box-shadow .2s; position: relative;
+}
+.notif-btn:hover { box-shadow: var(--neu-out-lg); }
+.notif-dot {
+  position: absolute; top: 8px; right: 9px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--oro-bright); border: 2px solid var(--bg);
+}
+
+/* ── WRAPPER ── */
+.wrapper { padding: 90px 36px 60px; max-width: 1300px; margin: 0 auto; }
+.page { display: none; animation: fadeIn .3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── PAGE HEADER ── */
+.ph { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; }
+.ph-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1.4px; color: var(--oro); font-weight: 500; margin-bottom: 5px; }
+.ph-title { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; color: var(--text-dark); letter-spacing: -.5px; line-height: 1.1; }
+.ph-sub   { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+.ph-actions { display: flex; gap: 12px; align-items: center; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px; border-radius: 999px; font-size: 13.5px; font-weight: 700;
+  font-family: 'Nunito', sans-serif; cursor: pointer; transition: all .2s;
+  border: none; text-decoration: none; user-select: none;
+}
+.btn-neu { background: var(--bg); color: var(--text); box-shadow: var(--neu-out); }
+.btn-neu:hover { box-shadow: var(--neu-out-lg); }
+.btn-neu:active { box-shadow: var(--neu-press); }
+.btn-solid { background: var(--verde); color: white; box-shadow: 5px 5px 14px rgba(45,80,22,.4), -3px -3px 8px rgba(255,255,255,.3); }
+.btn-solid:hover { background: var(--verde-mid); }
+.btn-oro { background: var(--oro-bright); color: var(--verde); box-shadow: 5px 5px 14px rgba(201,154,10,.35), -3px -3px 8px rgba(255,255,255,.4); }
+.btn-oro:hover { background: var(--oro); color: white; }
+.btn-sm { padding: 8px 16px; font-size: 12.5px; }
+.btn-danger { background: var(--bg); color: var(--red); box-shadow: var(--neu-out); }
+.btn-danger:hover { box-shadow: var(--neu-out-lg); }
+
+/* ── NEU BASE ── */
+.nc { background: var(--bg); border-radius: var(--radius-lg); box-shadow: var(--neu-out); padding: 24px; }
+.nc-inset { background: var(--bg); border-radius: var(--radius); box-shadow: var(--neu-in); padding: 16px; }
+
+/* ── BADGES ── */
+.badge-neu {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 11px; border-radius: 999px; font-size: 11px;
+  font-weight: 700; box-shadow: var(--neu-out); white-space: nowrap;
+}
+.bn-green { color: var(--green); } .bn-gold { color: var(--oro); }
+.bn-muted { color: var(--text-muted); } .bn-blue { color: var(--blue); }
+.bn-red   { color: var(--red); }
+
+/* ═══════════════════════════════════
+   DASHBOARD — MI ESPACIO
+═══════════════════════════════════ */
+.dash-grid { display: grid; grid-template-columns: repeat(12,1fr); gap: 22px; }
+
+/* Welcome banner */
+.welcome-editor {
+  grid-column: 1 / -1;
+  background: var(--verde);
+  border-radius: var(--radius-lg);
+  padding: 26px 32px;
+  box-shadow: 8px 8px 20px rgba(45,80,22,.35), -4px -4px 12px rgba(255,255,255,.25);
+  display: flex; align-items: center; justify-content: space-between;
+  overflow: hidden; position: relative;
+}
+.we-circle1 { position:absolute; top:-30px; right:-30px; width:180px; height:180px; border-radius:50%; border:40px solid rgba(255,255,255,.04); }
+.we-circle2 { position:absolute; bottom:-40px; right:80px; width:120px; height:120px; border-radius:50%; border:28px solid rgba(255,255,255,.03); }
+.we-tag   { font-size:10.5px; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:1.2px; color:var(--oro-pale); opacity:.8; margin-bottom:8px; }
+.we-title { font-family:'Sora',sans-serif; font-size:20px; font-weight:700; color:white; margin-bottom:6px; }
+.we-sub   { font-size:13px; color:rgba(255,255,255,.6); max-width:320px; }
+.we-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+.we-day   { font-family:'Sora',sans-serif; font-size:52px; font-weight:700; color:var(--oro-bright); letter-spacing:-2px; line-height:1; }
+.we-date  { font-size:12px; color:rgba(255,255,255,.5); font-family:'JetBrains Mono',monospace; text-align:right; }
+
+/* KPIs */
+.kpi-row { grid-column:1/-1; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.kpi-card {
+  background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out);
+  padding:22px; display:flex; flex-direction:column; gap:12px;
+  position:relative; overflow:hidden; transition:box-shadow .25s;
+}
+.kpi-card:hover { box-shadow:var(--neu-out-lg); }
+.kpi-card-bg { position:absolute; bottom:-14px; right:-14px; width:80px; height:80px; border-radius:50%; opacity:.1; }
+.kp-top { display:flex; align-items:center; justify-content:space-between; }
+.kp-icon { width:44px; height:44px; border-radius:14px; display:grid; place-items:center; font-size:20px; box-shadow:var(--neu-out); }
+.kp-change { display:flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; }
+.kp-up   { background:var(--green-pale); color:var(--green); }
+.kp-flat { background:var(--bg-dark);    color:var(--text-muted); }
+.kp-down { background:var(--red-pale);   color:var(--red); }
+.kp-value { font-family:'Sora',sans-serif; font-size:40px; font-weight:700; color:var(--text-dark); letter-spacing:-1.5px; line-height:1; }
+.kp-label { font-size:11.5px; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.8px; color:var(--text-light); font-weight:500; }
+.kp-desc  { font-size:12.5px; color:var(--text-muted); margin-top:-4px; }
+
+/* Quick actions */
+.quick-actions { grid-column:1/5; background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out); padding:24px; }
+.qa-title { font-family:'Sora',sans-serif; font-size:13px; font-weight:700; color:var(--text); margin-bottom:16px; }
+.qa-grid  { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.qa-item  {
+  background:var(--bg); border-radius:var(--radius); box-shadow:var(--neu-out);
+  padding:14px; display:flex; flex-direction:column; align-items:center; gap:8px;
+  cursor:pointer; transition:box-shadow .2s; text-align:center;
+}
+.qa-item:hover  { box-shadow:var(--neu-out-lg); }
+.qa-item:active { box-shadow:var(--neu-press); }
+.qa-emoji { font-size:22px; }
+.qa-label { font-size:11.5px; font-weight:700; color:var(--text); }
+
+/* Mis encuestas recientes card */
+.recent-surveys { grid-column:5/-1; background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out); padding:24px; }
+.rs-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.rs-title  { font-family:'Sora',sans-serif; font-size:15px; font-weight:700; color:var(--text-dark); }
+.rs-link   { font-size:12.5px; font-weight:700; color:var(--verde); cursor:pointer; text-decoration:none; }
+.rs-link:hover { text-decoration:underline; }
+.rs-empty  { text-align:center; padding:32px 0; color:var(--text-muted); font-size:13px; }
+.rs-empty-icon { font-size:36px; margin-bottom:10px; opacity:.4; }
+
+.rc-item {
+  background:var(--bg); border-radius:var(--radius); box-shadow:var(--neu-out);
+  padding:13px 15px; margin-bottom:10px; transition:box-shadow .2s; cursor:pointer;
+}
+.rc-item:hover { box-shadow:var(--neu-out-lg); }
+.rc-top  { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+.rc-name { font-size:13px; font-weight:700; color:var(--text-dark); }
+.rc-bar-wrap { display:flex; align-items:center; gap:8px; }
+.rc-mini-bar { flex:1; height:5px; border-radius:999px; box-shadow:var(--neu-in-sm); overflow:hidden; }
+.rc-mini-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,var(--verde),var(--verde-pale)); }
+.rc-num  { font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text-muted); white-space:nowrap; }
+
+/* Performance chart */
+.perf-card {
+  grid-column:1/-1; background:var(--bg); border-radius:var(--radius-lg);
+  box-shadow:var(--neu-out); padding:24px;
+}
+.cc-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.cc-title  { font-family:'Sora',sans-serif; font-size:15px; font-weight:700; color:var(--text-dark); }
+.cc-sub    { font-size:12px; color:var(--text-muted); margin-top:2px; }
+.tab-group { display:flex; gap:4px; background:var(--bg); box-shadow:var(--neu-in-sm); border-radius:999px; padding:4px; }
+.tg-tab    { padding:5px 14px; border-radius:999px; font-size:11.5px; font-weight:700; color:var(--text-muted); cursor:pointer; transition:all .2s; font-family:'JetBrains Mono',monospace; }
+.tg-tab.active { background:var(--verde); color:white; box-shadow:3px 3px 8px rgba(45,80,22,.3),-1px -1px 4px rgba(255,255,255,.2); }
+
+.chart-bars { height:150px; display:flex; align-items:flex-end; gap:10px; padding:0 4px; }
+.cb-wrap    { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
+.cb-bar     { width:100%; border-radius:8px 8px 4px 4px; box-shadow:inset -2px -2px 5px rgba(255,255,255,.4),inset 2px 2px 5px rgba(0,0,0,.08); cursor:pointer; transition:opacity .15s; min-height:6px; }
+.cb-bar:hover { opacity:.8; }
+.cb-bar.verde { background:linear-gradient(180deg,var(--verde-mid),var(--verde)); }
+.cb-bar.oro   { background:linear-gradient(180deg,var(--oro-bright),var(--oro)); }
+.cb-month  { font-size:9.5px; font-family:'JetBrains Mono',monospace; color:var(--text-light); text-transform:uppercase; letter-spacing:.5px; }
+
+/* Activity sidebar */
+.activity-card { grid-column:1/5; background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out); padding:24px; }
+.act-list { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.act-item {
+  background:var(--bg); border-radius:var(--radius); box-shadow:var(--neu-out);
+  padding:12px 14px; display:flex; align-items:flex-start; gap:12px;
+  transition:box-shadow .2s; cursor:pointer;
+}
+.act-item:hover { box-shadow:var(--neu-out-lg); }
+.act-icon { width:34px; height:34px; border-radius:10px; box-shadow:var(--neu-out); display:grid; place-items:center; font-size:15px; flex-shrink:0; }
+.act-text { font-size:12.5px; font-weight:600; color:var(--text-dark); line-height:1.3; }
+.act-meta { font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text-muted); margin-top:3px; }
+.act-time { font-size:10.5px; font-family:'JetBrains Mono',monospace; color:var(--text-light); margin-left:auto; white-space:nowrap; padding-top:1px; flex-shrink:0; }
+
+/* Progress widget */
+.progress-card { grid-column:5/-1; background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out); padding:24px; }
+.pw-items { display:flex; flex-direction:column; gap:14px; margin-top:14px; }
+.pw-item-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+.pw-name  { font-size:13px; font-weight:600; color:var(--text); }
+.pw-pct   { font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--text-muted); font-weight:500; }
+.pw-track { height:10px; background:var(--bg); border-radius:999px; box-shadow:var(--neu-in-sm); overflow:hidden; }
+.pw-fill  { height:100%; border-radius:999px; box-shadow:inset -1px -1px 3px rgba(255,255,255,.3),inset 1px 1px 3px rgba(0,0,0,.1); transition:width .8s ease; }
+.pw-fill.verde { background:linear-gradient(90deg,var(--verde-mid),var(--verde-pale)); }
+.pw-fill.oro   { background:linear-gradient(90deg,var(--oro-bright),var(--oro-pale)); }
+.pw-fill.mix   { background:linear-gradient(90deg,var(--verde),var(--oro-bright)); }
+
+/* ═══════════════════════════════════
+   MIS ENCUESTAS
+═══════════════════════════════════ */
+.surveys-layout { display:flex; flex-direction:column; gap:22px; }
+
+.filter-neu {
+  background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out);
+  padding:18px 24px; display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+}
+.fn-label { font-size:11.5px; font-family:'JetBrains Mono',monospace; color:var(--text-muted); white-space:nowrap; }
+.fn-input {
+  background:var(--bg); box-shadow:var(--neu-in-sm); border:none; border-radius:999px;
+  color:var(--text); font-family:'Nunito',sans-serif; font-size:13px; font-weight:600;
+  padding:8px 16px; outline:none; transition:box-shadow .2s;
+}
+.fn-input:focus { box-shadow:var(--neu-in); }
+.fn-input::placeholder { color:var(--text-light); font-weight:400; }
+select.fn-input { cursor:pointer; appearance:none; padding-right:30px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%237a8f6a' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+.fn-search { flex:1; position:relative; min-width:200px; }
+.fn-search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--text-light); pointer-events:none; }
+.fn-search input { width:100%; padding-left:36px; }
+
+.empty-state {
+  background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out);
+  padding:60px 24px; text-align:center;
+}
+.empty-icon  { font-size:52px; margin-bottom:16px; opacity:.35; }
+.empty-title { font-family:'Sora',sans-serif; font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
+.empty-sub   { font-size:13px; color:var(--text-muted); margin-bottom:24px; }
+
+.surveys-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.survey-card  { background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out); overflow:hidden; transition:box-shadow .2s; cursor:pointer; }
+.survey-card:hover { box-shadow:var(--neu-out-lg); }
+.sc-banner { height:6px; }
+.sc-banner.activa    { background:linear-gradient(90deg,var(--verde),var(--verde-pale)); }
+.sc-banner.pendiente { background:linear-gradient(90deg,var(--oro-bright),var(--oro-pale)); }
+.sc-banner.borrador  { background:linear-gradient(90deg,var(--text-muted),var(--bg-dark)); }
+.sc-body     { padding:18px 20px; }
+.sc-top      { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+.sc-name     { font-family:'Sora',sans-serif; font-size:15px; font-weight:700; color:var(--text-dark); line-height:1.2; }
+.sc-desc     { font-size:12px; color:var(--text-muted); margin-top:3px; }
+.sc-stats    { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:14px 0; }
+.sc-stat     { background:var(--bg); border-radius:var(--radius-sm); box-shadow:var(--neu-in-sm); padding:10px; text-align:center; }
+.sc-stat-val { font-family:'Sora',sans-serif; font-size:18px; font-weight:700; color:var(--text-dark); }
+.sc-stat-lbl { font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--text-light); text-transform:uppercase; margin-top:2px; }
+.sc-author   { display:flex; align-items:center; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid rgba(0,0,0,.05); font-size:12px; color:var(--text-muted); }
+.sc-av       { width:26px; height:26px; border-radius:50%; background:var(--verde); color:var(--oro-bright); font-size:11px; font-weight:700; display:grid; place-items:center; flex-shrink:0; box-shadow:var(--neu-out); }
+.sc-actions  { display:flex; gap:7px; margin-top:12px; }
+.sc-btn      { flex:1; padding:8px; border-radius:var(--radius-sm); background:var(--bg); box-shadow:var(--neu-out); border:none; font-size:12px; font-weight:700; color:var(--text-muted); cursor:pointer; transition:all .2s; font-family:'Nunito',sans-serif; display:flex; align-items:center; justify-content:center; gap:5px; }
+.sc-btn:hover { color:var(--verde); box-shadow:var(--neu-out-lg); }
+.sc-btn:active { box-shadow:var(--neu-press); }
+.sc-btn.del:hover { color:var(--red); }
+
+/* ═══════════════════════════════════
+   PLANTILLAS
+═══════════════════════════════════ */
+.templates-layout { display:flex; flex-direction:column; gap:22px; }
+.tpl-type-bar {
+  background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out);
+  padding:18px 24px;
+}
+.tpl-type-label { font-size:11.5px; font-family:'JetBrains Mono',monospace; color:var(--text-muted); margin-bottom:14px; text-transform:uppercase; letter-spacing:.8px; }
+.tpl-type-tabs  { display:flex; gap:10px; flex-wrap:wrap; }
+.tpl-tab {
+  padding:9px 20px; border-radius:999px; font-size:13px; font-weight:700;
+  cursor:pointer; background:var(--bg); box-shadow:var(--neu-out); color:var(--text-muted);
+  transition:all .2s; font-family:'Nunito',sans-serif;
+}
+.tpl-tab:hover  { color:var(--verde); box-shadow:var(--neu-out-lg); }
+.tpl-tab:active { box-shadow:var(--neu-press); }
+.tpl-tab.active { background:var(--verde); color:white; box-shadow:4px 4px 10px rgba(45,80,22,.35); }
+
+.tpl-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.tpl-card {
+  background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out);
+  padding:22px; transition:box-shadow .2s; cursor:pointer;
+}
+.tpl-card:hover { box-shadow:var(--neu-out-lg); }
+.tpl-emoji { font-size:32px; margin-bottom:12px; }
+.tpl-name  { font-family:'Sora',sans-serif; font-size:15px; font-weight:700; color:var(--text-dark); margin-bottom:6px; }
+.tpl-desc  { font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-bottom:16px; }
+.tpl-type-badge { font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text-light); text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; }
+.tpl-use-btn {
+  width:100%; padding:10px; border-radius:999px; background:var(--verde); color:white;
+  border:none; font-family:'Nunito',sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; box-shadow:4px 4px 10px rgba(45,80,22,.3); transition:all .2s;
+}
+.tpl-use-btn:hover { background:var(--verde-mid); box-shadow:5px 5px 14px rgba(45,80,22,.4); }
+
+/* ═══════════════════════════════════
+   ESTADÍSTICAS
+═══════════════════════════════════ */
+.stats-layout { display:flex; flex-direction:column; gap:22px; }
+
+.stats-mini-row { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+.gauge-card {
+  background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out);
+  padding:24px; display:flex; align-items:center; gap:20px;
+}
+.gauge-circle { width:90px; height:90px; border-radius:50%; box-shadow:var(--neu-out-lg); display:grid; place-items:center; flex-shrink:0; background:var(--bg); }
+.gauge-inner  { width:66px; height:66px; border-radius:50%; box-shadow:var(--neu-in); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.gauge-val    { font-family:'Sora',sans-serif; font-size:18px; font-weight:700; color:var(--text-dark); line-height:1; }
+.gauge-unit   { font-size:9px; font-family:'JetBrains Mono',monospace; color:var(--text-light); text-transform:uppercase; }
+.gauge-name   { font-family:'Sora',sans-serif; font-size:15px; font-weight:700; color:var(--text-dark); margin-bottom:4px; }
+.gauge-sub    { font-size:12px; color:var(--text-muted); }
+
+.stats-charts { display:grid; grid-template-columns:2fr 1fr; gap:22px; }
+
+.bar-chart-horiz { padding:16px; display:flex; flex-direction:column; gap:10px; }
+.bar-row { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--body); }
+.bar-row-label { width:90px; font-size:12px; color:var(--text-muted); text-align:right; }
+.bar-track { flex:1; height:10px; background:var(--bg); border-radius:999px; box-shadow:var(--neu-in-sm); overflow:hidden; }
+.bar-fill  { height:100%; border-radius:999px; transition:width .6s ease; }
+.bar-fill.verde { background:linear-gradient(90deg,var(--verde-mid),var(--verde-pale)); }
+.bar-fill.oro   { background:linear-gradient(90deg,var(--oro-bright),var(--oro-pale)); }
+.bar-pct   { font-size:11.5px; font-family:'JetBrains Mono',monospace; color:var(--text-muted); min-width:36px; }
+
+.donut-card { background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out); padding:24px; }
+.donut-wrap { display:flex; align-items:center; gap:18px; margin-top:16px; }
+.donut-svg-wrap { position:relative; width:110px; height:110px; flex-shrink:0; }
+.donut-svg   { width:110px; height:110px; transform:rotate(-90deg); }
+.donut-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.donut-pct   { font-family:'Sora',sans-serif; font-size:22px; font-weight:700; color:var(--text-dark); line-height:1; }
+.donut-pct-label { font-size:9.5px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.5px; }
+.donut-legend { display:flex; flex-direction:column; gap:9px; flex:1; }
+.dl-row { display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--text); }
+.dl-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.dl-val { margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; color:var(--text-muted); }
+
+/* ═══════════════════════════════════
+   EDITOR DE ENCUESTA (3 COL)
+═══════════════════════════════════ */
+.editor-layout {
+  display:grid; grid-template-columns:240px 1fr 260px; gap:20px; align-items:start;
+}
+
+/* Panel izquierdo */
+.editor-left { display:flex; flex-direction:column; gap:16px; position:sticky; top:80px; }
+
+.ed-panel { background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out); padding:18px; }
+.ed-panel-title { font-size:10.5px; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:14px; font-weight:500; }
+
+.q-type-btn {
+  display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px;
+  background:var(--bg); border-radius:var(--radius-sm); box-shadow:var(--neu-out);
+  border:none; font-family:'Nunito',sans-serif; font-size:13px; font-weight:600;
+  color:var(--text); cursor:pointer; transition:all .2s; margin-bottom:8px; text-align:left;
+}
+.q-type-btn:last-child { margin-bottom:0; }
+.q-type-btn:hover { color:var(--verde); box-shadow:var(--neu-out-lg); }
+.q-type-btn:active { box-shadow:var(--neu-press); }
+.q-type-icon { width:28px; height:28px; border-radius:8px; background:var(--bg); box-shadow:var(--neu-in-sm); display:grid; place-items:center; font-size:14px; flex-shrink:0; }
+.q-type-plus { margin-left:auto; font-size:16px; color:var(--verde); }
+
+/* Centro */
+.editor-center { display:flex; flex-direction:column; gap:14px; }
+
+.ed-form-header {
+  background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out);
+  padding:24px; border-left:5px solid var(--oro-bright);
+}
+.ed-form-title-input {
+  font-family:'Sora',sans-serif; font-size:22px; font-weight:700; color:var(--text-dark);
+  background:transparent; border:none; outline:none; width:100%;
+}
+.ed-form-title-input::placeholder { color:var(--bg-dark); }
+.ed-form-desc-input {
+  font-size:13.5px; color:var(--text-muted); background:transparent; border:none;
+  outline:none; width:100%; margin-top:8px; border-top:1px solid rgba(0,0,0,.05); padding-top:10px;
+}
+.ed-form-desc-input::placeholder { color:var(--bg-dark); }
+
+.q-card {
+  background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out);
+  padding:20px 22px; border-left:4px solid var(--verde);
+}
+.q-top   { display:flex; gap:12px; align-items:flex-start; margin-bottom:14px; }
+.q-input { flex:1; background:var(--bg); box-shadow:var(--neu-in-sm); border:none; border-radius:var(--radius-sm); color:var(--text-dark); font-family:'Nunito',sans-serif; font-size:14px; font-weight:600; padding:11px 14px; outline:none; transition:box-shadow .2s; }
+.q-input:focus { box-shadow:var(--neu-in); }
+.q-input::placeholder { color:var(--text-light); font-weight:400; }
+select.q-input { appearance:none; cursor:pointer; padding-right:32px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%237a8f6a' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+
+.opt-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid rgba(0,0,0,.04); }
+.opt-circle { width:14px; height:14px; border-radius:50%; box-shadow:var(--neu-out); flex-shrink:0; }
+.opt-input  { flex:1; background:transparent; border:none; outline:none; font-family:'Nunito',sans-serif; font-size:13.5px; font-weight:600; color:var(--text); }
+.opt-input::placeholder { color:var(--text-light); font-weight:400; }
+.opt-del { color:var(--text-light); cursor:pointer; font-size:13px; transition:color .15s; }
+.opt-del:hover { color:var(--red); }
+
+.add-opt { font-size:12.5px; font-weight:700; color:var(--verde-mid); cursor:pointer; margin-top:10px; display:flex; align-items:center; gap:5px; }
+.add-opt:hover { color:var(--verde); }
+
+.q-footer { display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding-top:12px; border-top:1px solid rgba(0,0,0,.04); }
+.chk-group { display:flex; align-items:center; gap:7px; font-size:13px; color:var(--text); cursor:pointer; }
+.chk { width:16px; height:16px; border-radius:4px; box-shadow:var(--neu-out); transition:all .12s; display:grid; place-items:center; flex-shrink:0; cursor:pointer; font-size:10px; }
+.chk.on { background:var(--verde); color:white; }
+
+.add-q-btn {
+  width:100%; padding:12px; border-radius:var(--radius-lg); background:var(--bg);
+  box-shadow:var(--neu-out); border:none; font-family:'Nunito',sans-serif;
+  font-size:13.5px; font-weight:700; color:var(--verde); cursor:pointer;
+  transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.add-q-btn:hover  { box-shadow:var(--neu-out-lg); }
+.add-q-btn:active { box-shadow:var(--neu-press); }
+
+/* Derecha — preview */
+.editor-right { position:sticky; top:80px; }
+.preview-panel {
+  background:var(--bg); border-radius:var(--radius-lg); box-shadow:var(--neu-out); overflow:hidden;
+}
+.pv-header  { background:var(--verde); padding:14px 16px; }
+.pv-label   { font-size:10px; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,.6); margin-bottom:4px; }
+.pv-title   { font-family:'Sora',sans-serif; font-size:14px; font-weight:700; color:white; line-height:1.2; }
+.pv-sub     { font-size:11.5px; color:rgba(255,255,255,.6); margin-top:4px; }
+.pv-bar     { height:4px; background:var(--verde-pale); margin:0 16px; border-radius:999px; margin-bottom:10px; overflow:hidden; }
+.pv-bar-fill { height:100%; width:30%; background:var(--oro-bright); border-radius:999px; }
+.pv-body    { padding:14px 16px; display:flex; flex-direction:column; gap:14px; }
+.pv-q       { font-size:12.5px; font-weight:700; color:var(--text-dark); margin-bottom:7px; }
+.pv-opt     { display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--text); padding:4px 0; }
+.pv-opt-circle { width:12px; height:12px; border-radius:50%; box-shadow:var(--neu-out); flex-shrink:0; }
+
+/* scrollbar */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:var(--bg-dark); }
+::-webkit-scrollbar-thumb { background:var(--verde-pale); border-radius:999px; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="brand">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="brand-name">SIEI – UAEMex</div>
+      <div class="brand-sub">Sistema Integral de Encuestas</div>
+    </div>
+  </div>
+
+  <div class="nav-pills">
+    <div class="nav-pill active" onclick="sp('dashboard',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Mi Espacio
+    </div>
+    <div class="nav-pill" onclick="sp('surveys',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Mis Encuestas
+    </div>
+    <div class="nav-pill" onclick="sp('stats',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Estadísticas
+    </div>
+    <div class="nav-pill" onclick="sp('templates',this)">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Plantillas
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <div class="role-chip">EDITOR</div>
+    <div class="status-chip"><div class="status-led"></div>Panel de editor</div>
+    <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+    <div class="avatar-btn">Ju</div>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+<!-- ═══════ MI ESPACIO (DASHBOARD) ═══════ -->
+<section class="page active" id="dashboard">
+  <div class="ph">
+    <div>
+      <div class="ph-label">Editor · Mi Espacio</div>
+      <div class="ph-title">Panel de Control del Editor</div>
+      <div class="ph-sub">Vista general de tus encuestas · Actualizado el 04/03/2026, 14:20:59</div>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-neu btn-sm">↓ Exportar</button>
+      <button class="btn btn-oro" onclick="sp('surveys',document.querySelectorAll('.nav-pill')[1])">+ Crear encuesta</button>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+
+    <!-- Welcome -->
+    <div class="welcome-editor">
+      <div class="we-circle1"></div><div class="we-circle2"></div>
+      <div>
+        <div class="we-tag">UAEMex · SIEI 2026 · Rol Editor</div>
+        <div class="we-title">¡Bienvenido de vuelta, Juan Antonio! 👋</div>
+        <div class="we-sub">Gestiona tus encuestas, revisa estadísticas y crea nuevos formularios desde aquí.</div>
+        <div style="margin-top:16px;display:flex;gap:10px;">
+          <button class="btn btn-oro btn-sm" onclick="sp('surveys',document.querySelectorAll('.nav-pill')[1])">Mis encuestas →</button>
+          <button class="btn btn-neu btn-sm" onclick="sp('templates',document.querySelectorAll('.nav-pill')[3])">Ver plantillas</button>
+        </div>
+      </div>
+      <div class="we-right">
+        <div class="we-day">04</div>
+        <div class="we-date">MAR / 2026<br>14:20 PM</div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kp-top"><div class="kp-icon">📋</div><span class="kp-change kp-up">↑ +100%</span></div>
+        <div class="kp-value">0</div>
+        <div class="kp-label">Total Encuestas</div>
+        <div class="kp-desc">Creadas por ti</div>
+        <div class="kpi-card-bg" style="background:var(--verde)"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kp-top"><div class="kp-icon">📬</div><span class="kp-change kp-flat">— Promedio 0</span></div>
+        <div class="kp-value">0</div>
+        <div class="kp-label">Respuestas Totales</div>
+        <div class="kp-desc">En tus encuestas activas</div>
+        <div class="kpi-card-bg" style="background:var(--oro)"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kp-top"><div class="kp-icon">✅</div><span class="kp-change kp-flat">— Sin datos</span></div>
+        <div class="kp-value">0%</div>
+        <div class="kp-label">Tasa de Completado</div>
+        <div class="kp-desc">Completadas vs total</div>
+        <div class="kpi-card-bg" style="background:var(--text-muted)"></div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="quick-actions">
+      <div class="qa-title">Acciones Rápidas</div>
+      <div class="qa-grid">
+        <div class="qa-item" onclick="sp('editor',document.querySelectorAll('.nav-pill')[1])">
+          <div class="qa-emoji">✍️</div><div class="qa-label">Nueva Encuesta</div>
+        </div>
+        <div class="qa-item" onclick="sp('templates',document.querySelectorAll('.nav-pill')[3])">
+          <div class="qa-emoji">📐</div><div class="qa-label">Plantillas</div>
+        </div>
+        <div class="qa-item" onclick="sp('stats',document.querySelectorAll('.nav-pill')[2])">
+          <div class="qa-emoji">📊</div><div class="qa-label">Estadísticas</div>
+        </div>
+        <div class="qa-item" onclick="sp('surveys',document.querySelectorAll('.nav-pill')[1])">
+          <div class="qa-emoji">📁</div><div class="qa-label">Mis Encuestas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Encuestas recientes -->
+    <div class="recent-surveys">
+      <div class="rs-header">
+        <div class="rs-title">Mis encuestas recientes</div>
+        <a class="rs-link" onclick="sp('surveys',document.querySelectorAll('.nav-pill')[1])">Ver todas →</a>
+      </div>
+      <div class="rs-empty">
+        <div class="rs-empty-icon">📋</div>
+        <div style="font-weight:700;color:var(--text);font-size:14px;margin-bottom:6px">Aún no tienes encuestas</div>
+        <div style="font-size:12.5px;color:var(--text-muted)">Crea tu primera encuesta desde plantillas o desde cero</div>
+        <button class="btn btn-solid btn-sm" style="margin-top:18px" onclick="sp('templates',document.querySelectorAll('.nav-pill')[3])">Explorar plantillas</button>
+      </div>
+    </div>
+
+    <!-- Performance chart -->
+    <div class="perf-card">
+      <div class="cc-header">
+        <div><div class="cc-title">Rendimiento de mis encuestas</div><div class="cc-sub">Respuestas recibidas por día</div></div>
+        <div class="tab-group">
+          <div class="tg-tab">7D</div><div class="tg-tab active">30D</div><div class="tg-tab">90D</div>
+        </div>
+      </div>
+      <div class="chart-bars">
+        <div class="cb-wrap"><div class="cb-bar verde" style="height:5%"></div><span class="cb-month">03/02</span></div>
+        <div class="cb-wrap"><div class="cb-bar oro"   style="height:5%"></div><span class="cb-month">06/02</span></div>
+        <div class="cb-wrap"><div class="cb-bar verde" style="height:5%"></div><span class="cb-month">09/02</span></div>
+        <div class="cb-wrap"><div class="cb-bar oro"   style="height:5%"></div><span class="cb-month">12/02</span></div>
+        <div class="cb-wrap"><div class="cb-bar verde" style="height:5%"></div><span class="cb-month">15/02</span></div>
+        <div class="cb-wrap"><div class="cb-bar oro"   style="height:5%"></div><span class="cb-month">18/02</span></div>
+        <div class="cb-wrap"><div class="cb-bar verde" style="height:5%"></div><span class="cb-month">21/02</span></div>
+        <div class="cb-wrap"><div class="cb-bar oro"   style="height:5%"></div><span class="cb-month">24/02</span></div>
+        <div class="cb-wrap"><div class="cb-bar verde" style="height:5%"></div><span class="cb-month">27/02</span></div>
+        <div class="cb-wrap"><div class="cb-bar oro"   style="height:5%"></div><span class="cb-month">03/03</span></div>
+      </div>
+    </div>
+
+    <!-- Activity -->
+    <div class="activity-card">
+      <div class="cc-title">Actividad Reciente</div>
+      <div class="act-list">
+        <div class="act-item">
+          <div class="act-icon">📊</div>
+          <div style="flex:1"><div class="act-text">0 respuestas registradas</div><div class="act-meta">En tus encuestas activas</div></div>
+          <div class="act-time">Últimos días</div>
+        </div>
+        <div class="act-item">
+          <div class="act-icon">✅</div>
+          <div style="flex:1"><div class="act-text">0 encuestas activas</div><div class="act-meta">Disponibles para responder</div></div>
+          <div class="act-time">Ahora</div>
+        </div>
+        <div class="act-item">
+          <div class="act-icon">📝</div>
+          <div style="flex:1"><div class="act-text">0 encuestas en borrador</div><div class="act-meta">Listas para ajustar o publicar</div></div>
+          <div class="act-time">Reciente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-card">
+      <div class="cc-title">Participación por Encuesta</div>
+      <div class="cc-sub" style="font-size:12px;color:var(--text-muted);margin-top:2px">Respuestas vs. límite configurado</div>
+      <div class="pw-items">
+        <div class="pw-item">
+          <div class="pw-item-top"><span class="pw-name">Encuesta de satisfacción</span><span class="pw-pct">—</span></div>
+          <div class="pw-track"><div class="pw-fill verde" style="width:0%"></div></div>
+        </div>
+        <div class="pw-item">
+          <div class="pw-item-top"><span class="pw-name">Cuestionario de clima</span><span class="pw-pct">—</span></div>
+          <div class="pw-track"><div class="pw-fill oro" style="width:0%"></div></div>
+        </div>
+        <div class="pw-item">
+          <div class="pw-item-top"><span class="pw-name">Registro de invitados</span><span class="pw-pct">—</span></div>
+          <div class="pw-track"><div class="pw-fill mix" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div style="text-align:center;padding:14px 0;font-size:12.5px;color:var(--text-muted)">Crea encuestas para ver datos aquí</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════ MIS ENCUESTAS ═══════ -->
+<section class="page" id="surveys">
+  <div class="ph">
+    <div>
+      <div class="ph-label">Editor · Mis Encuestas</div>
+      <div class="ph-title">Mis Encuestas</div>
+      <div class="ph-sub">Administra y filtra las encuestas que has creado</div>
+    </div>
+    <button class="btn btn-solid" onclick="sp('editor',null)">+ Crear encuesta</button>
+  </div>
+
+  <div class="surveys-layout">
+    <div class="filter-neu">
+      <span class="fn-label">Desde:</span>
+      <input type="date" class="fn-input" style="width:145px">
+      <span class="fn-label">Estado:</span>
+      <select class="fn-input" style="width:135px"><option>Todas</option><option>Activa</option><option>Pendiente</option><option>Borrador</option><option>Cerrada</option></select>
+      <div class="fn-search"><span class="fn-search-icon">🔍</span><input type="text" class="fn-input" placeholder="Buscar encuesta..."></div>
+      <button class="btn btn-neu btn-sm">↺ Resetear</button>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-title">No se encontraron encuestas</div>
+      <div class="empty-sub">Intenta ajustar los filtros de búsqueda o crea tu primera encuesta</div>
+      <button class="btn btn-solid" onclick="sp('editor',null)">+ Crear encuesta</button>
+    </div>
+
+    <!-- Con datos (oculto, mostrar al tener encuestas) -->
+    <!-- <div class="surveys-grid">
+      <div class="survey-card"> ... </div>
+    </div> -->
+  </div>
+</section>
+
+<!-- ═══════ ESTADÍSTICAS ═══════ -->
+<section class="page" id="stats">
+  <div class="ph">
+    <div>
+      <div class="ph-label">Editor · Análisis</div>
+      <div class="ph-title">Estadísticas</div>
+      <div class="ph-sub">Analiza el rendimiento de tus encuestas</div>
+    </div>
+  </div>
+
+  <div class="stats-layout">
+    <div class="filter-neu">
+      <span class="fn-label">Encuesta:</span>
+      <select class="fn-input" style="width:260px"><option>No hay encuestas disponibles</option></select>
+      <span class="fn-label">Desde:</span>
+      <input type="date" class="fn-input" style="width:145px">
+      <span class="fn-label">Hasta:</span>
+      <input type="date" class="fn-input" style="width:145px">
+      <button class="btn btn-solid btn-sm">▼ Aplicar</button>
+      <button class="btn btn-neu btn-sm">Limpiar</button>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state">
+      <div class="empty-icon">🥧</div>
+      <div class="empty-title">Selecciona una encuesta para ver sus estadísticas</div>
+      <div class="empty-sub">Cuando tus encuestas reciban respuestas, verás la evolución y distribución aquí</div>
+    </div>
+
+    <!-- Con datos: -->
+    <div class="stats-mini-row">
+      <div class="gauge-card">
+        <div class="gauge-circle"><div class="gauge-inner"><div class="gauge-val">0</div><div class="gauge-unit">Resp.</div></div></div>
+        <div><div class="gauge-name">Total de Respuestas</div><div class="gauge-sub">Periodo seleccionado</div><div style="margin-top:10px"><span class="kp-change kp-flat" style="display:inline-flex">— 0% vs año anterior</span></div></div>
+      </div>
+      <div class="gauge-card">
+        <div class="gauge-circle"><div class="gauge-inner"><div class="gauge-val">0%</div><div class="gauge-unit">Comp.</div></div></div>
+        <div><div class="gauge-name">Tasa de Completado</div><div class="gauge-sub">Formularios finalizados</div><div style="margin-top:10px"><span class="kp-change kp-flat" style="display:inline-flex">— Sin variación</span></div></div>
+      </div>
+    </div>
+
+    <div class="stats-charts">
+      <div class="nc">
+        <div class="cc-header" style="margin-bottom:14px">
+          <div><div class="cc-title">Evolución de respuestas</div><div class="cc-sub">Por día en el periodo seleccionado</div></div>
+        </div>
+        <div class="chart-bars" style="height:130px">
+          <div class="cb-wrap"><div class="cb-bar verde" style="height:5%"></div><span class="cb-month">Lun</span></div>
+          <div class="cb-wrap"><div class="cb-bar oro"   style="height:5%"></div><span class="cb-month">Mar</span></div>
+          <div class="cb-wrap"><div class="cb-bar verde" style="height:5%"></div><span class="cb-month">Mie</span></div>
+          <div class="cb-wrap"><div class="cb-bar oro"   style="height:5%"></div><span class="cb-month">Jue</span></div>
+          <div class="cb-wrap"><div class="cb-bar verde" style="height:5%"></div><span class="cb-month">Vie</span></div>
+          <div class="cb-wrap"><div class="cb-bar oro"   style="height:5%"></div><span class="cb-month">Sab</span></div>
+          <div class="cb-wrap"><div class="cb-bar verde" style="height:5%"></div><span class="cb-month">Dom</span></div>
+        </div>
+      </div>
+
+      <div class="donut-card">
+        <div class="cc-title">Distribución</div>
+        <div class="donut-wrap">
+          <div class="donut-svg-wrap">
+            <svg class="donut-svg" viewBox="0 0 42 42">
+              <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="#dde3d6" stroke-width="5"/>
+              <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="var(--verde)" stroke-width="5" stroke-dasharray="60 40" stroke-dashoffset="0"/>
+              <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="var(--oro-bright)" stroke-width="5" stroke-dasharray="25 75" stroke-dashoffset="-60"/>
+              <circle cx="21" cy="21" r="15.9155" fill="transparent" stroke="var(--text-light)" stroke-width="5" stroke-dasharray="15 85" stroke-dashoffset="-85"/>
+            </svg>
+            <div class="donut-center"><div class="donut-pct">0</div><div class="donut-pct-label">Total</div></div>
+          </div>
+          <div class="donut-legend">
+            <div class="dl-row"><div class="dl-dot" style="background:var(--verde)"></div>Completadas<div class="dl-val">0</div></div>
+            <div class="dl-row"><div class="dl-dot" style="background:var(--oro-bright)"></div>En progreso<div class="dl-val">0</div></div>
+            <div class="dl-row"><div class="dl-dot" style="background:var(--text-light)"></div>Abandonadas<div class="dl-val">0</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nc">
+      <div class="cc-title" style="margin-bottom:4px">Distribución de opciones</div>
+      <div class="cc-sub" style="font-size:12px;color:var(--text-muted);margin-bottom:18px">Primera pregunta de opción múltiple</div>
+      <div class="bar-chart-horiz" style="padding:0">
+        <div class="bar-row"><span class="bar-row-label">Muy satisfecho</span><div class="bar-track"><div class="bar-fill verde" style="width:0%"></div></div><span class="bar-pct">0%</span></div>
+        <div class="bar-row"><span class="bar-row-label">Satisfecho</span><div class="bar-track"><div class="bar-fill oro" style="width:0%"></div></div><span class="bar-pct">0%</span></div>
+        <div class="bar-row"><span class="bar-row-label">Neutral</span><div class="bar-track"><div class="bar-fill verde" style="width:0%"></div></div><span class="bar-pct">0%</span></div>
+        <div class="bar-row"><span class="bar-row-label">Insatisfecho</span><div class="bar-track"><div class="bar-fill oro" style="width:0%"></div></div><span class="bar-pct">0%</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PLANTILLAS ═══════ -->
+<section class="page" id="templates">
+  <div class="ph">
+    <div>
+      <div class="ph-label">Editor · Plantillas</div>
+      <div class="ph-title">Crear a partir de plantillas</div>
+      <div class="ph-sub">Elige un escenario y comienza con una plantilla preconfigurada</div>
+    </div>
+    <button class="btn btn-neu btn-sm" onclick="sp('dashboard',document.querySelectorAll('.nav-pill')[0])">← Volver al panel</button>
+  </div>
+
+  <div class="templates-layout">
+    <div class="tpl-type-bar">
+      <div class="tpl-type-label">Tipo de formulario — selecciona el tipo de experiencia que quieres crear</div>
+      <div class="tpl-type-tabs">
+        <div class="tpl-tab active">Encuesta</div>
+        <div class="tpl-tab">Cuestionario</div>
+        <div class="tpl-tab">Invitación</div>
+        <div class="tpl-tab">Registro</div>
+      </div>
+    </div>
+
+    <div class="tpl-grid">
+      <div class="tpl-card">
+        <div class="tpl-emoji">😊</div>
+        <div class="tpl-type-badge">Plantilla · Encuesta</div>
+        <div class="tpl-name">Encuesta de satisfacción de empleados</div>
+        <div class="tpl-desc">Mide el clima laboral y la satisfacción del personal. Incluye preguntas sobre ambiente, comunicación y liderazgo.</div>
+        <button class="tpl-use-btn" onclick="sp('editor',null)">✏ Usar plantilla</button>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-emoji">🎓</div>
+        <div class="tpl-type-badge">Plantilla · Encuesta</div>
+        <div class="tpl-name">Evaluación docente estudiantil</div>
+        <div class="tpl-desc">Permite a los alumnos evaluar el desempeño del profesor, metodología y materiales del curso.</div>
+        <button class="tpl-use-btn" onclick="sp('editor',null)">✏ Usar plantilla</button>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-emoji">🏛️</div>
+        <div class="tpl-type-badge">Plantilla · Encuesta</div>
+        <div class="tpl-name">Diagnóstico institucional</div>
+        <div class="tpl-desc">Evalúa la percepción general de servicios, infraestructura y atención al estudiante universitario.</div>
+        <button class="tpl-use-btn" onclick="sp('editor',null)">✏ Usar plantilla</button>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-emoji">📋</div>
+        <div class="tpl-type-badge">Plantilla · Cuestionario</div>
+        <div class="tpl-name">Examen de conocimientos</div>
+        <div class="tpl-desc">Cuestionario de opción múltiple para evaluación académica con respuestas únicas y calificación automática.</div>
+        <button class="tpl-use-btn" onclick="sp('editor',null)">✏ Usar plantilla</button>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-emoji">📅</div>
+        <div class="tpl-type-badge">Plantilla · Registro</div>
+        <div class="tpl-name">Registro de evento académico</div>
+        <div class="tpl-desc">Formulario de inscripción para conferencias, talleres o seminarios con datos del asistente.</div>
+        <button class="tpl-use-btn" onclick="sp('editor',null)">✏ Usar plantilla</button>
+      </div>
+      <div class="tpl-card">
+        <div class="tpl-emoji">✉️</div>
+        <div class="tpl-type-badge">Plantilla · Invitación</div>
+        <div class="tpl-name">Invitación con confirmación de asistencia</div>
+        <div class="tpl-desc">Envía una invitación formal con campo de confirmación, datos del evento y notas adicionales.</div>
+        <button class="tpl-use-btn" onclick="sp('editor',null)">✏ Usar plantilla</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ EDITOR DE ENCUESTA ═══════ -->
+<section class="page" id="editor">
+  <div class="ph">
+    <div>
+      <div class="ph-label">Editor · Nueva Encuesta</div>
+      <div class="ph-title">Nueva Encuesta</div>
+      <div class="ph-sub">Editor visual para construir y ajustar tu encuesta</div>
+    </div>
+    <div class="ph-actions">
+      <button class="btn btn-neu btn-sm" onclick="sp('surveys',document.querySelectorAll('.nav-pill')[1])">← Mis encuestas</button>
+      <button class="btn btn-solid">💾 Guardar cambios</button>
+    </div>
+  </div>
+
+  <div class="editor-layout">
+
+    <!-- Izquierda -->
+    <div class="editor-left">
+      <div class="ed-panel">
+        <div class="ed-panel-title">Tipos de pregunta</div>
+        <button class="q-type-btn"><div class="q-type-icon">☰</div>Opción múltiple<span class="q-type-plus">+</span></button>
+        <button class="q-type-btn"><div class="q-type-icon">✅</div>Casillas<span class="q-type-plus">+</span></button>
+        <button class="q-type-btn"><div class="q-type-icon">T</div>Texto corto<span class="q-type-plus">+</span></button>
+        <button class="q-type-btn"><div class="q-type-icon">≡</div>Texto largo<span class="q-type-plus">+</span></button>
+        <button class="q-type-btn"><div class="q-type-icon">⭐</div>Escala<span class="q-type-plus">+</span></button>
+      </div>
+
+      <div class="ed-panel">
+        <div class="ed-panel-title">Acciones</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-neu btn-sm" style="width:100%;justify-content:center;border-radius:var(--radius-sm)">⚙ Configuración general</button>
+          <button class="btn btn-solid btn-sm" style="width:100%;justify-content:center;border-radius:var(--radius-sm)">💾 Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Centro -->
+    <div class="editor-center">
+      <div class="ed-form-header">
+        <input class="ed-form-title-input" type="text" value="Encuesta de satisfacción de los empleados">
+        <input class="ed-form-desc-input" type="text" value="Mide el clima laboral y la satisfacción del personal.">
+      </div>
+
+      <!-- Q1 -->
+      <div class="q-card">
+        <div class="q-top">
+          <input type="text" class="q-input" value="¿Qué tan satisfecho estás con tu ambiente de trabajo?" style="flex:1">
+          <select class="q-input" style="width:190px"><option>Opción múltiple</option><option>Casillas</option><option>Texto corto</option><option>Texto largo</option></select>
+        </div>
+        <div class="opt-row"><div class="opt-circle"></div><input class="opt-input" value="Muy satisfecho"><span class="opt-del">✕</span></div>
+        <div class="opt-row"><div class="opt-circle"></div><input class="opt-input" value="Satisfecho"><span class="opt-del">✕</span></div>
+        <div class="opt-row"><div class="opt-circle"></div><input class="opt-input" value="Neutral"><span class="opt-del">✕</span></div>
+        <div class="opt-row"><div class="opt-circle"></div><input class="opt-input" value="Insatisfecho"><span class="opt-del">✕</span></div>
+        <div class="opt-row"><div class="opt-circle"></div><input class="opt-input" value="Muy insatisfecho"><span class="opt-del">✕</span></div>
+        <div class="add-opt">+ Agregar opción</div>
+        <div class="q-footer">
+          <label class="chk-group"><div class="chk on">✓</div><span>Obligatoria</span></label>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-neu btn-sm" style="border-radius:var(--radius-sm);padding:6px 10px">⧉</button>
+            <button class="btn btn-danger btn-sm" style="border-radius:var(--radius-sm);padding:6px 10px">🗑</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q-card">
+        <div class="q-top">
+          <input type="text" class="q-input" value="¿Cómo calificarías la comunicación dentro de tu equipo?" style="flex:1">
+          <select class="q-input" style="width:190px"><option>Opción múltiple</option></select>
+        </div>
+        <div class="opt-row"><div class="opt-circle"></div><input class="opt-input" value="Excelente"><span class="opt-del">✕</span></div>
+        <div class="opt-row"><div class="opt-circle"></div><input class="opt-input" value="Buena"><span class="opt-del">✕</span></div>
+        <div class="opt-row"><div class="opt-circle"></div><input class="opt-input" value="Regular"><span class="opt-del">✕</span></div>
+        <div class="opt-row"><div class="opt-circle"></div><input class="opt-input" value="Mala"><span class="opt-del">✕</span></div>
+        <div class="add-opt">+ Agregar opción</div>
+        <div class="q-footer">
+          <label class="chk-group"><div class="chk on">✓</div><span>Obligatoria</span></label>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-neu btn-sm" style="border-radius:var(--radius-sm);padding:6px 10px">⧉</button>
+            <button class="btn btn-danger btn-sm" style="border-radius:var(--radius-sm);padding:6px 10px">🗑</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q-card">
+        <div class="q-top">
+          <input type="text" class="q-input" value="Menciona una cosa que podríamos mejorar para ti" style="flex:1">
+          <select class="q-input" style="width:190px"><option selected>Texto largo</option><option>Opción múltiple</option></select>
+        </div>
+        <div class="nc-inset" style="min-height:60px">
+          <div style="font-size:12px;color:var(--text-light);font-family:'JetBrains Mono',monospace">Respuesta abierta del encuestado...</div>
+        </div>
+        <div class="q-footer">
+          <label class="chk-group"><div class="chk">  </div><span>Obligatoria</span></label>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-neu btn-sm" style="border-radius:var(--radius-sm);padding:6px 10px">⧉</button>
+            <button class="btn btn-danger btn-sm" style="border-radius:var(--radius-sm);padding:6px 10px">🗑</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="add-q-btn">+ Agregar pregunta</button>
+    </div>
+
+    <!-- Derecha — Preview -->
+    <div class="editor-right">
+      <div class="preview-panel">
+        <div class="pv-header">
+          <div class="pv-label">Vista Previa</div>
+          <div class="pv-title">Encuesta de satisfacción de los empleados</div>
+          <div class="pv-sub">Mide el clima laboral y la satisfacción del personal.</div>
+        </div>
+        <div style="padding:10px 16px 0">
+          <div class="pv-bar"><div class="pv-bar-fill"></div></div>
+        </div>
+        <div class="pv-body">
+          <div>
+            <div class="pv-q">1. ¿Qué tan satisfecho estás con tu ambiente de trabajo? *</div>
+            <div class="pv-opt"><div class="pv-opt-circle"></div>Muy satisfecho</div>
+            <div class="pv-opt"><div class="pv-opt-circle"></div>Satisfecho</div>
+            <div class="pv-opt"><div class="pv-opt-circle"></div>Neutral</div>
+            <div class="pv-opt"><div class="pv-opt-circle"></div>Insatisfecho</div>
+            <div class="pv-opt"><div class="pv-opt-circle"></div>Muy insatisfecho</div>
+          </div>
+          <div>
+            <div class="pv-q">2. ¿Cómo calificarías la comunicación dentro de tu equipo? *</div>
+            <div class="pv-opt"><div class="pv-opt-circle"></div>Excelente</div>
+            <div class="pv-opt"><div class="pv-opt-circle"></div>Buena</div>
+            <div class="pv-opt"><div class="pv-opt-circle"></div>Regular</div>
+            <div class="pv-opt"><div class="pv-opt-circle"></div>Mala</div>
+          </div>
+          <div>
+            <div class="pv-q">3. Menciona una cosa que podríamos mejorar para ti</div>
+            <div style="background:var(--bg);border-radius:var(--radius-sm);box-shadow:var(--neu-in-sm);padding:10px;font-size:11.5px;color:var(--text-light);min-height:50px">Escribe tu respuesta...</div>
+          </div>
+          <button class="btn btn-solid btn-sm" style="width:100%;justify-content:center;border-radius:var(--radius-sm)">Enviar respuestas</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</div><!-- /wrapper -->
+
+<script>
+function sp(id, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+// Tab groups
+document.querySelectorAll('.tg-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    t.closest('.tab-group').querySelectorAll('.tg-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+// Template type tabs
+document.querySelectorAll('.tpl-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    t.closest('.tpl-type-tabs').querySelectorAll('.tpl-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+// Checkboxes
+document.querySelectorAll('.chk').forEach(c => {
+  c.addEventListener('click', () => {
+    c.classList.toggle('on');
+    c.textContent = c.classList.contains('on') ? '✓' : ' ';
+  });
+});
+</script>
+</body>
+</html>

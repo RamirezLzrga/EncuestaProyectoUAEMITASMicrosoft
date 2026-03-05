@@ -44,7 +44,7 @@ class SurveyController extends Controller
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
-        $surveys = $query->orderBy('created_at', 'desc')->get();
+        $surveys = $query->orderBy('created_at', 'desc')->paginate(10);
 
         $user = Auth::user();
         $view = $user && $user->role === 'admin'
