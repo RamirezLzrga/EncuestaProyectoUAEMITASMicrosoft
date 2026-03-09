@@ -3,29 +3,30 @@
 @section('title', 'Monitoreo en Vivo')
 
 @section('content')
-<div class="dashboard-wrap">
-    <div class="dash-header">
-        <div>
-            <div class="dash-eyebrow">SIEI UAEMex</div>
-            <h2 class="dash-title">Monitoreo en Vivo</h2>
-            <p class="dash-subtitle">Usuarios conectados y actividad en tiempo real.</p>
-        </div>
-        <span class="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Actualización automática cada 5 segundos
+<div class="ph">
+    <div class="ph-left">
+        <div class="ph-label">Administración</div>
+        <div class="ph-title">Monitoreo en Vivo</div>
+        <div class="ph-sub">Usuarios conectados y actividad en tiempo real</div>
+    </div>
+    <div class="ph-actions">
+        <span class="status-pill status-approved" style="background:var(--bg);">
+            <span style="width:8px; height:8px; border-radius:50%; background:var(--green); display:inline-block;"></span>
+            Actualización cada 5s
         </span>
     </div>
+</div>
 
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
     <div class="space-y-6 xl:col-span-1">
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="neu-card" style="margin-bottom:0; padding:22px;">
             <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <i class="fas fa-users text-uaemex"></i>
                 Usuarios conectados AHORA
             </h2>
             <div class="space-y-3">
                 @foreach($usersOnline as $user)
-                    <div class="flex items-center justify-between gap-3 border rounded-lg p-3">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--bg); border-radius:var(--radius); box-shadow:var(--neu-in-sm); padding:12px;">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-full bg-uaemex text-white flex items-center justify-center text-xs font-semibold">
                                 {{ substr($user['name'], 0, 2) }}
@@ -43,7 +44,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="neu-card" style="margin-bottom:0; padding:22px;">
             <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <i class="fas fa-stream text-uaemex"></i>
                 Actividad reciente
@@ -51,7 +52,7 @@
             <div class="space-y-3 max-h-64 overflow-y-auto text-sm">
                 @foreach($recentActivity as $item)
                     <div class="flex items-start gap-3">
-                        <div class="w-6 h-6 rounded-full bg-gold flex items-center justify-center text-uaemex-dark text-xs">
+                        <div style="width:24px; height:24px; border-radius:999px; background:var(--oro-pale); color:var(--verde); display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow:var(--neu-out);">
                             <i class="fas fa-bolt"></i>
                         </div>
                         <div>
@@ -65,7 +66,7 @@
     </div>
 
     <div class="space-y-6 xl:col-span-2">
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="neu-card" style="margin-bottom:0; padding:22px;">
             <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <i class="fas fa-chart-line text-uaemex"></i>
                 Actividad por hora
@@ -83,7 +84,7 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="neu-card" style="margin-bottom:0; padding:22px;">
             <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <i class="fas fa-map-marker-alt text-uaemex"></i>
                 Mapa de calor por ubicación
@@ -91,10 +92,10 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 @foreach($heatmap as $point)
-                    <div class="border rounded-lg p-3 flex flex-col gap-1">
+                    <div style="background:var(--bg); border-radius:var(--radius); box-shadow:var(--neu-in-sm); padding:12px; display:flex; flex-direction:column; gap:6px;">
                         <p class="font-semibold text-gray-800">{{ $point['location'] }}</p>
                         <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                            <div class="h-full bg-gold rounded-full" style="width: {{ min(100, $point['count'] * 10) }}%;"></div>
+                            <div class="h-full rounded-full" style="background:var(--oro); width: {{ min(100, $point['count'] * 10) }}%;"></div>
                         </div>
                         <p class="text-xs text-gray-500">{{ $point['count'] }} usuarios conectados</p>
                     </div>
@@ -102,6 +103,5 @@
             </div>
         </div>
     </div>
-</div>
 </div>
 @endsection

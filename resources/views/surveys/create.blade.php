@@ -1,797 +1,836 @@
 @extends('layouts.admin')
 
-@section('title', 'Crear Nueva Encuesta')
+@push('styles')
+<style>
+/* ═══════════════════════════════════
+   EDITOR BUILDER LAYOUT
+═══════════════════════════════════ */
+.editor-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 320px;
+  gap: 24px;
+  align-items: start;
+  padding-bottom: 60px;
+}
+@media (max-width: 1100px) {
+  .editor-layout { grid-template-columns: 240px 1fr; }
+  .editor-right { display: none; } /* Hide preview on smaller screens */
+}
+
+/* Left Panel */
+.editor-left { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 90px; }
+.ed-panel {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 20px;
+}
+.ed-panel-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Question Type Buttons */
+.q-type-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--neu-out);
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: left;
+}
+.q-type-btn:hover {
+  box-shadow: var(--neu-out-lg);
+  transform: translateY(-2px);
+  color: var(--verde);
+}
+.q-type-btn:active { box-shadow: var(--neu-press); transform: translateY(0); }
+.q-type-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: var(--bg-light);
+  display: grid; place-items: center;
+  color: var(--text-muted);
+  box-shadow: var(--neu-in-sm);
+}
+.q-type-btn:hover .q-type-icon { color: var(--verde); background: white; }
+.q-type-plus { margin-left: auto; font-size: 16px; font-weight: 300; opacity: 0.5; }
+
+/* Center Panel */
+.editor-center { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.ed-form-header {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 32px;
+  border-top: 6px solid var(--verde);
+}
+.ed-form-title-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: 'Sora', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+  padding: 8px 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.ed-form-title-input:focus { border-bottom-color: var(--verde); }
+.ed-form-desc-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 8px 0;
+  margin-top: 8px;
+  outline: none;
+}
+
+/* Question Card */
+.q-card {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out);
+  padding: 24px;
+  position: relative;
+  transition: box-shadow 0.2s;
+  border-left: 4px solid transparent;
+}
+.q-card:hover { box-shadow: var(--neu-out-lg); }
+.q-card:focus-within { border-left-color: var(--verde); }
+
+.q-top { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start; }
+.q-input {
+  background: var(--bg-light);
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  color: var(--text-dark);
+  outline: none;
+  transition: all 0.2s;
+}
+.q-input:focus {
+  background: white;
+  border-color: var(--verde-pale);
+  color: var(--verde);
+}
+
+.opt-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.opt-circle { width: 16px; height: 16px; border: 2px solid var(--text-light); border-radius: 50%; }
+.opt-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 4px 0;
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.opt-input:focus { border-bottom-color: var(--verde-pale); }
+.opt-del { cursor: pointer; color: var(--text-light); transition: color 0.2s; font-size: 18px; line-height: 1; }
+.opt-del:hover { color: var(--red); }
+
+.add-opt {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px; margin-left: 26px;
+  font-size: 13px; font-weight: 700; color: var(--verde);
+  cursor: pointer; transition: color 0.2s;
+}
+.add-opt:hover { color: var(--verde-mid); }
+
+.q-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 20px; padding-top: 16px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+.chk-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+.chk {
+  width: 18px; height: 18px; border-radius: 4px;
+  background: var(--bg-light); box-shadow: var(--neu-in-sm);
+  display: grid; place-items: center; font-size: 12px; color: var(--verde);
+}
+.chk.on { background: var(--verde); color: white; box-shadow: none; }
+
+.add-q-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  box-shadow: var(--neu-out);
+  border: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--verde);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.add-q-btn:hover { box-shadow: var(--neu-out-lg); transform: translateY(-2px); }
+.add-q-btn:active { box-shadow: var(--neu-press); transform: translateY(0); }
+
+/* Right Panel (Preview) */
+.editor-right { position: sticky; top: 90px; height: calc(100vh - 120px); overflow: hidden; }
+.preview-panel {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--neu-out-lg);
+  height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  border: 8px solid var(--bg-dark);
+}
+.pv-header {
+  padding: 20px;
+  background: var(--verde);
+  color: white;
+  flex-shrink: 0;
+}
+.pv-label { font-size: 10px; letter-spacing: 1px; opacity: 0.7; margin-bottom: 4px; }
+.pv-title { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; line-height: 1.2; }
+.pv-sub { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+.pv-bar { height: 4px; background: rgba(0,0,0,0.1); }
+.pv-bar-fill { width: 30%; height: 100%; background: var(--oro-bright); }
+.pv-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: #f8f9fa;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.pv-q { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 8px; }
+.pv-opt { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; margin-bottom: 6px; }
+.pv-opt-circle { width: 14px; height: 14px; border: 1px solid #ccc; border-radius: 50%; background: white; }
+</style>
+@endpush
 
 @section('content')
-<div class="page-header">
-    <div class="page-title-row">
-        <div>
-            <h1 class="page-title">Crear Nueva Encuesta</h1>
-            <p class="page-subtitle">Diseña tu formulario al estilo Google Forms</p>
-        </div>
-        <div class="page-actions">
-            <a href="{{ route('surveys.index') }}" class="btn btn-secondary">
-                <i class="fas fa-times"></i>
-                Cancelar
-            </a>
-        </div>
+
+{{-- Page Header --}}
+<div class="ph">
+    <div>
+        <div class="ph-label">Admin · {{ $mode === 'create' ? 'Nueva Encuesta' : 'Editar Encuesta' }}</div>
+        <h1 class="ph-title">{{ $mode === 'create' ? 'Nueva Encuesta' : 'Editar Encuesta' }}</h1>
+        <p class="ph-sub">Editor visual para construir y ajustar la encuesta</p>
     </div>
-</div>
-
-<div id="builder-root" class="mt-2 rounded-[32px] bg-white py-10">
-        <form action="{{ route('surveys.store') }}" method="POST" id="surveyForm" class="max-w-3xl mx-auto relative space-y-4">
-            @csrf
-            <input type="hidden" name="header_image" id="header-image-input">
-            <input type="hidden" name="year" value="{{ date('Y') }}">
-            <div class="px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
-                <div class="flex flex-wrap gap-4 items-center text-xs text-gray-600">
-                    <div class="flex items-center gap-2">
-                        <i class="far fa-calendar text-[#006838]"></i>
-                        <div class="flex items-center gap-2">
-                            <span>Inicio:</span>
-                            <input type="date" name="start_date" value="{{ date('Y-m-d') }}" class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#006838]">
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span>Cierre automático:</span>
-                        <input type="date" name="end_date" value="{{ date('Y-m-d', strtotime('+1 month')) }}" class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#006838]">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span>Límite de respuestas:</span>
-                        <input type="number" name="settings[max_responses]" min="1" class="w-20 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#006838]" placeholder="100">
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-4 items-center text-xs text-gray-600">
-                    <label class="inline-flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="settings[allow_multiple]" value="1" class="w-4 h-4 text-[#006838] rounded focus:ring-[#006838]">
-                        <span>Permitir múltiples respuestas</span>
-                    </label>
-                    <label class="inline-flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="settings[one_response_per_ip]" value="1" class="w-4 h-4 text-[#006838] rounded focus:ring-[#006838]">
-                        <span>Una respuesta por usuario</span>
-                    </label>
-                </div>
-            </div>
-
-            <div id="question-toolbar" class="absolute -right-16 hidden lg:flex flex-col gap-3">
-                <button type="button" onclick="addQuestion()" class="btn-add-question w-10 h-10 rounded-full bg-[#006838] text-white shadow-lg flex items-center justify-center hover:bg-[#004d28] transition" title="Añadir pregunta">
-                    <i class="fas fa-plus"></i>
-                </button>
-                <button type="button" onclick="focusSurveyTitle()" class="w-10 h-10 rounded-full bg-white text-gray-700 border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50 transition text-xs font-bold" title="Editar título">
-                    Tt
-                </button>
-                <button type="button" onclick="addImageToActiveQuestion()" class="w-10 h-10 rounded-full bg-white text-gray-700 border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50 transition" title="Añadir imagen">
-                    <i class="far fa-image"></i>
-                </button>
-                <button type="button" onclick="addVideoToActiveQuestion()" class="w-10 h-10 rounded-full bg-white text-gray-700 border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50 transition" title="Añadir video">
-                    <i class="fab fa-youtube"></i>
-                </button>
-                <button type="button" onclick="addSection()" class="w-10 h-10 rounded-full bg-white text-gray-700 border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50 transition" title="Añadir sección">
-                    <i class="fas fa-indent"></i>
-                </button>
-            </div>
-
-            <div id="header-image-container" class="max-w-3xl mx-auto -mt-4 mb-4 hidden">
-                <img id="header-image-preview" src="" alt="Imagen de encabezado" class="w-full h-48 object-cover rounded-t-2xl">
-            </div>
-
-            <div data-header-card class="bg-white rounded-2xl shadow-md border border-gray-100 border-t-8" style="border-top-color: #006838;">
-                <div class="border-b border-gray-200 px-8 pt-6 pb-4">
-                    <input type="text" name="title" id="input-title" placeholder="Formulario sin título" class="w-full text-3xl font-normal border-b border-transparent focus:border-[#006838] focus:outline-none pb-2 placeholder-gray-500" required>
-                    <textarea name="description" id="input-description" placeholder="Descripción del formulario" class="w-full mt-2 text-sm text-gray-700 border-b border-transparent focus:border-gray-300 focus:outline-none pb-2 resize-none placeholder-gray-500"></textarea>
-                </div>
-            </div>
-
-            <div id="questions-container" class="space-y-4"></div>
-
-            <div class="flex items-center gap-4 pt-4">
-                <button type="submit" class="btn-save-form bg-[#006838] text-white px-6 py-2 rounded-md text-sm font-semibold shadow hover:bg-[#004d28] transition">
-                    Guardar encuesta
-                </button>
-                <a href="{{ route('surveys.index') }}" class="text-sm text-gray-700 font-semibold hover:underline">
-                    Cancelar
-                </a>
-            </div>
-        </form>
-
-        <button type="button" onclick="toggleThemePanel()" class="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-white text-gray-700 border border-gray-200 shadow-xl flex items-center justify-center hover:bg-gray-50">
-            <i class="fas fa-palette"></i>
+    <div class="ph-actions">
+        <a href="{{ route('surveys.index') }}" class="btn btn-neu btn-sm">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Mis encuestas
+        </a>
+        <button type="submit" form="builderForm" class="btn btn-solid">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Guardar cambios
         </button>
+    </div>
+</div>
 
-        <div id="theme-panel" class="hidden fixed top-0 right-0 h-full w-72 bg-white shadow-2xl border-l border-gray-200 z-50 flex flex-col">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                <div>
-                    <p class="text-xs uppercase tracking-widest text-gray-400 font-semibold">Tema</p>
-                    <p class="text-sm font-bold text-gray-800">Formulario</p>
-                </div>
-                <button type="button" onclick="toggleThemePanel()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
+@php
+    $action = $mode === 'create'
+        ? route('surveys.store')
+        : route('surveys.update', $survey);
+@endphp
+
+<form action="{{ $action }}" method="POST" id="builderForm">
+    @csrf
+    @if($mode === 'edit')
+        @method('PUT')
+    @endif
+
+    <input type="hidden" name="year" value="{{ $survey->year ?? date('Y') }}">
+    <input type="hidden" name="start_date" value="{{ optional($survey->start_date)->format('Y-m-d') ?? date('Y-m-d') }}">
+    <input type="hidden" name="end_date" value="{{ optional($survey->end_date)->format('Y-m-d') ?? date('Y-m-d', strtotime('+1 month')) }}">
+
+    <div class="editor-layout">
+        
+        {{-- LEFT PANEL --}}
+        <div class="editor-left">
+            <div class="ed-panel">
+                <div class="ed-panel-title">Tipos de pregunta</div>
+                
+                <button type="button" data-type="multiple_choice" class="q-type-btn add-question-type">
+                    <div class="q-type-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></div>
+                    Opción múltiple
+                    <div class="q-type-plus">+</div>
+                </button>
+                
+                <button type="button" data-type="checkboxes" class="q-type-btn add-question-type">
+                    <div class="q-type-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg></div>
+                    Casillas
+                    <div class="q-type-plus">+</div>
+                </button>
+                
+                <button type="button" data-type="short_text" class="q-type-btn add-question-type">
+                    <div class="q-type-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></div>
+                    Texto corto
+                    <div class="q-type-plus">+</div>
+                </button>
+                
+                <button type="button" data-type="paragraph" class="q-type-btn add-question-type">
+                    <div class="q-type-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg></div>
+                    Texto largo
+                    <div class="q-type-plus">+</div>
+                </button>
+
+                <button type="button" data-type="linear_scale" class="q-type-btn add-question-type">
+                    <div class="q-type-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                    Escala
+                    <div class="q-type-plus">+</div>
                 </button>
             </div>
-            <div class="flex-1 overflow-y-auto p-4 space-y-6">
-                <div class="space-y-3">
-                    <p class="text-xs font-semibold text-gray-500">Estilo del texto</p>
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-xs text-gray-500">Encabezado</span>
-                            <div class="flex items-center gap-1">
-                                <select id="theme-header-font" class="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#006838]">
-                                    <option value="'DM Sans', sans-serif">DM Sans</option>
-                                    <option value="'Playfair Display', serif">Playfair</option>
-                                    <option value="'DM Mono', monospace">Mono</option>
-                                </select>
-                                <select id="theme-header-size" class="border border-gray-200 rounded-lg px-1.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#006838]">
-                                    <option value="24">24</option>
-                                    <option value="28">28</option>
-                                    <option value="32" selected>32</option>
-                                    <option value="36">36</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-xs text-gray-500">Pregunta</span>
-                            <div class="flex items-center gap-1">
-                                <select id="theme-question-font" class="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#006838]">
-                                    <option value="'DM Sans', sans-serif">DM Sans</option>
-                                    <option value="'Playfair Display', serif">Playfair</option>
-                                    <option value="'DM Mono', monospace">Mono</option>
-                                </select>
-                                <select id="theme-question-size" class="border border-gray-200 rounded-lg px-1.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#006838]">
-                                    <option value="12">12</option>
-                                    <option value="14" selected>14</option>
-                                    <option value="16">16</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-xs text-gray-500">Texto</span>
-                            <div class="flex items-center gap-1">
-                                <select id="theme-text-font" class="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#006838]">
-                                    <option value="'DM Sans', sans-serif">DM Sans</option>
-                                    <option value="'Playfair Display', serif">Playfair</option>
-                                    <option value="'DM Mono', monospace">Mono</option>
-                                </select>
-                                <select id="theme-text-size" class="border border-gray-200 rounded-lg px-1.5 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#006838]">
-                                    <option value="11">11</option>
-                                    <option value="12">12</option>
-                                    <option value="14" selected>14</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+
+            <div class="ed-panel">
+                <div class="ed-panel-title">Acciones</div>
+                <button type="submit" class="btn btn-solid w-full mt-3" style="width:100%; justify-content:center;">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    Guardar cambios
+                </button>
+            </div>
+        </div>
+
+        {{-- CENTER PANEL --}}
+        <div class="editor-center">
+            
+            <div class="ed-form-header">
+                <input type="text" name="title" id="input-title" value="{{ old('title', $survey->title) }}" placeholder="Encuesta sin título" class="ed-form-title-input" required>
+                <input type="text" name="description" id="input-description" value="{{ old('description', $survey->description) }}" placeholder="Descripción de la encuesta" class="ed-form-desc-input">
+            </div>
+
+            <div id="questions-container" style="display:flex; flex-direction:column; gap:14px;">
+                {{-- Questions will be injected here --}}
+            </div>
+
+            <button type="button" id="btn-add-question" class="add-q-btn">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Agregar pregunta
+            </button>
+        </div>
+
+        {{-- RIGHT PANEL (Preview) --}}
+        <div class="editor-right">
+            <div class="preview-panel">
+                <div class="pv-header">
+                    <div class="pv-label">VISTA PREVIA</div>
+                    <div id="preview-title" class="pv-title">Sin título</div>
+                    <div id="preview-description" class="pv-sub">Sin descripción</div>
                 </div>
-
-                <div class="space-y-3">
-                    <p class="text-xs font-semibold text-gray-500">Encabezado</p>
-                    <button type="button" onclick="openImageDialog('header')" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600 flex items-center justify-center gap-2 hover:bg-gray-50">
-                        <i class="far fa-image text-gray-400"></i>
-                        Elegir imagen
-                    </button>
-                </div>
-
-                <div class="space-y-3">
-                    <p class="text-xs font-semibold text-gray-500">Color</p>
-                    <div class="flex flex-wrap gap-2">
-                        <button type="button" class="w-7 h-7 rounded-full border-2 border-black/60 bg-[#006838]" data-theme-primary="#006838"></button>
-                        <button type="button" class="w-7 h-7 rounded-full border-2 border-transparent bg-[#C9A961]" data-theme-primary="#C9A961"></button>
-                        <button type="button" class="w-7 h-7 rounded-full border-2 border-transparent bg-[#22c55e]" data-theme-primary="#22c55e"></button>
-                        <button type="button" class="w-7 h-7 rounded-full border-2 border-transparent bg-[#0f172a]" data-theme-primary="#0f172a"></button>
-                        <button type="button" class="w-7 h-7 rounded-full border-2 border-transparent bg-[#9e9e9e]" data-theme-primary="#9e9e9e"></button>
-                    </div>
-
-                    <p class="text-xs font-semibold text-gray-500 mt-3">Fondo</p>
-                    <div class="flex gap-2">
-                        <button type="button" class="w-6 h-6 rounded-full border border-gray-300 bg-white" data-theme-bg="#ffffff"></button>
-                        <button type="button" class="w-6 h-6 rounded-full border border-gray-300 bg-[#f0fdf4]" data-theme-bg="#f0fdf4"></button>
-                        <button type="button" class="w-6 h-6 rounded-full border border-gray-300 bg-[#fefce8]" data-theme-bg="#fefce8"></button>
-                        <button type="button" class="w-6 h-6 rounded-full border border-gray-300 bg-[#ecfeff]" data-theme-bg="#ecfeff"></button>
+                <div class="pv-bar"><div class="pv-bar-fill"></div></div>
+                <div id="preview-questions" class="pv-body">
+                    <div class="text-center text-muted" style="padding:20px; font-size:12px; color:var(--text-muted);">
+                        Agrega preguntas para visualizar
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
-</div>
+</form>
 
-<div id="image-dialog" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <h2 class="text-sm font-semibold text-gray-800">Insertar imagen</h2>
-            <button type="button" onclick="closeImageDialog()" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="border-b border-gray-200 px-6 pt-3">
-            <div class="flex gap-6 text-xs font-semibold text-gray-500">
-                <span class="text-[#006838] border-b-2 border-[#006838] pb-2">Subir</span>
-                <span class="pb-2 text-gray-400">Cámara web</span>
-                <span class="pb-2 text-gray-400">Por URL</span>
-                <span class="pb-2 text-gray-400">Fotos</span>
-                <span class="pb-2 text-gray-400">Google Drive</span>
-                <span class="pb-2 text-gray-400">Google Imágenes</span>
-            </div>
-        </div>
-        <div class="px-6 py-8">
-            <div class="border-2 border-dashed border-gray-300 rounded-xl py-10 flex flex-col items-center justify-center gap-3 bg-gray-50">
-                <div class="w-20 h-12 bg-gray-200 rounded-md"></div>
-                <p class="text-xs text-gray-500">Esta versión permite insertar imágenes usando una URL pública.</p>
-                <input id="image-dialog-url" type="text" class="mt-2 w-full max-w-md border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#006838]" placeholder="Pega aquí la URL de la imagen">
-            </div>
-        </div>
-        <div class="px-6 py-3 border-t border-gray-200 flex justify-end gap-2">
-            <button type="button" onclick="closeImageDialog()" class="px-4 py-2 text-xs font-semibold text-gray-700 rounded-lg hover:bg-gray-100">
-                Cancelar
-            </button>
-            <button type="button" onclick="confirmImageDialog()" class="px-4 py-2 text-xs font-semibold text-white bg-[#006838] rounded-lg hover:bg-[#004d28]">
-                Insertar
-            </button>
-        </div>
-    </div>
-</div>
-
+{{-- TEMPLATE FOR NEW QUESTION --}}
 <template id="question-template">
-    <div class="question-item bg-white rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition relative overflow-hidden">
-        <div class="accent-bar absolute left-0 top-0 h-full w-1 bg-[#006838]"></div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3 px-6 pt-6">
-            <div class="md:col-span-2">
-                <input type="text" name="questions[INDEX][text]" placeholder="Escribe tu pregunta" class="question-input-text w-full border-b border-gray-300 focus:border-[#006838] focus:outline-none pb-2 text-gray-800" required>
-            </div>
-            <div>
-                <select name="questions[INDEX][type]" onchange="toggleOptions(this)" class="question-input-type w-full bg-white border border-gray-300 rounded px-3 py-2 text-gray-700 text-sm focus:outline-none focus:border-[#006838] cursor-pointer">
+    <div class="q-card question-item">
+        <div class="q-top">
+            <input type="text" class="q-input question-input-text" placeholder="Escribe la pregunta">
+            
+            <div style="position:relative; width:140px;">
+                <select class="q-input question-input-type" style="width:100%;">
                     <option value="multiple_choice">Opción múltiple</option>
-                    <option value="checkboxes">Casillas de verificación</option>
+                    <option value="checkboxes">Casillas</option>
                     <option value="short_text">Texto corto</option>
-                    <option value="paragraph">Párrafo</option>
-                    <option value="dropdown">Desplegable</option>
-                    <option value="linear_scale">Escala lineal</option>
-                    <option value="rating">Calificación</option>
+                    <option value="paragraph">Texto largo</option>
+                    <option value="linear_scale">Escala</option>
                     <option value="date">Fecha</option>
-                    <option value="time">Hora</option>
                 </select>
             </div>
         </div>
 
-        <div class="question-control-preview px-6 pb-3 text-sm text-gray-600"></div>
-
-        <div class="options-container space-y-2 px-6 pb-4">
-            <div class="option-item flex items-center gap-3">
-                <i class="far fa-circle text-gray-500"></i>
-                <input type="text" name="questions[INDEX][options][]" value="Opción 1" class="question-input-option flex-1 border-b border-dotted border-gray-400 focus:border-[#006838] focus:outline-none text-sm text-gray-700" placeholder="Opción">
-                <button type="button" onclick="removeOption(this)" class="text-gray-400 hover:text-red-500 transition">
-                    <i class="fas fa-close text-xs"></i>
-                </button>
+        {{-- Options container (for multiple choice/checkboxes) --}}
+        <div class="options-container" style="padding-left:10px;">
+            <div class="option-item opt-row">
+                <div class="opt-circle"></div>
+                <input type="text" class="opt-input question-input-option" value="Opción 1">
+                <div class="opt-del btn-remove-option">✕</div>
             </div>
-            <button type="button" onclick="addOption(this, 'INDEX')" class="text-[#006838] text-sm font-semibold hover:underline flex items-center gap-2 mt-1">
-                <i class="fas fa-plus"></i> Agregar opción
-            </button>
+            <div class="add-opt btn-add-option">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Agregar opción
+            </div>
         </div>
 
-        <div class="flex justify-between items-center border-t border-gray-100 px-6 py-3 text-sm text-gray-600">
-            <label class="flex items-center gap-2 cursor-pointer">
-                <span>Obligatoria</span>
-                <input type="checkbox" name="questions[INDEX][required]" class="question-input-required w-4 h-4 text-[#006838] rounded focus:ring-[#006838]">
+        {{-- Scale Configuration --}}
+        <div class="scale-config" style="display:none; margin-top:10px; padding-left:10px;">
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+                <label style="font-size:12px; color:#666;">Rango:</label>
+                <select class="q-input question-input-scale-min" style="width:60px;">
+                    <option value="0">0</option>
+                    <option value="1" selected>1</option>
+                </select>
+                <span style="font-size:12px; color:#666;">a</span>
+                <select class="q-input question-input-scale-max" style="width:60px;">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5" selected>5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+            <div style="display:grid; grid-template-columns: auto 1fr; gap:8px; align-items:center;">
+                <span class="scale-label-preview-min" style="font-size:12px; color:#666; width:20px; text-align:center;">1</span>
+                <input type="text" class="q-input question-input-scale-min-label" placeholder="Etiqueta para el mínimo (opcional)" style="font-size:12px;">
+                
+                <span class="scale-label-preview-max" style="font-size:12px; color:#666; width:20px; text-align:center;">5</span>
+                <input type="text" class="q-input question-input-scale-max-label" placeholder="Etiqueta para el máximo (opcional)" style="font-size:12px;">
+            </div>
+        </div>
+
+        <div class="q-footer">
+            <label class="chk-group">
+                <div class="chk question-input-required-chk"></div>
+                <input type="checkbox" class="question-input-required" style="display:none;">
+                Obligatoria
             </label>
-            <div class="flex items-center gap-2 text-gray-500">
-                <button type="button" onclick="duplicateQuestion(this)" class="p-1 rounded-full hover:bg-gray-100" title="Duplicar">
-                    <i class="far fa-copy"></i>
-                </button>
-                <button type="button" onclick="removeQuestion(this)" class="p-1 rounded-full hover:bg-gray-100" title="Eliminar">
-                    <i class="far fa-trash-alt"></i>
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="btn-remove-question" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
                 </button>
             </div>
         </div>
     </div>
 </template>
 
-<template id="section-template">
-    <div class="question-item bg-[#f0fdf4] rounded-2xl shadow-md border border-gray-200 hover:shadow-lg transition relative overflow-hidden" data-section="true">
-        <div class="px-6 pt-4 pb-3 bg-[#f0fdf4] border-b border-gray-200">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-[#166534] bg-white section-label">
-                Sección
-            </span>
-        </div>
-        <div class="px-6 pt-4 pb-4 bg-white">
-            <input type="hidden" name="questions[INDEX][type]" value="section">
-            <input type="text" name="questions[INDEX][text]" placeholder="Sección sin título" class="question-input-text w-full border-b border-gray-300 focus:border-[#006838] focus:outline-none pb-2 text-gray-800 mb-2" required>
-            <textarea name="questions[INDEX][description]" placeholder="Descripción (opcional)" class="question-input-description w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#006838] resize-none"></textarea>
-        </div>
-        <div class="flex justify-end items-center border-t border-gray-100 px-6 py-3 text-sm text-gray-500 bg-white">
-            <span>Después de esta sección: Ir a la siguiente sección</span>
-        </div>
-    </div>
-</template>
 @endsection
 
 @push('scripts')
 <script>
-    let questionCount = 0;
-    let themePrimaryColor = '#006838';
-    let themeBackgroundColor = '#ffffff';
-    let activeQuestion = null;
-    let imageDialogContext = null;
+    let questionIndex = 0;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        addQuestion();
-        initThemePanel();
-        window.addEventListener('resize', positionQuestionToolbar);
-        updateSectionLabels();
+    document.addEventListener('DOMContentLoaded', function () {
+        // Quick add buttons (left panel)
+        document.querySelectorAll('.add-question-type').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                addQuestion(btn.getAttribute('data-type'));
+            });
+        });
+
+        // Main add button (bottom)
+        const addButton = document.getElementById('btn-add-question');
+        if (addButton) {
+            addButton.addEventListener('click', function () {
+                addQuestion('multiple_choice');
+            });
+        }
+
+        const form = document.getElementById('builderForm');
+        form.addEventListener('submit', function () {
+            syncQuestionsToInputs();
+        });
+
+        // Live preview updates
+        form.addEventListener('input', function () {
+            updatePreview();
+        });
+
+        // Initial Load
+        @if($survey->questions && count($survey->questions) > 0)
+            @foreach($survey->questions as $q)
+                addQuestion(@json($q['type']), @json($q));
+            @endforeach
+        @else
+            addQuestion('multiple_choice');
+        @endif
+
+        updatePreview();
     });
 
-    function addQuestion() {
+    function addQuestion(type, existing) {
         const container = document.getElementById('questions-container');
         const template = document.getElementById('question-template');
-        const clone = template.content.cloneNode(true);
-        const html = clone.firstElementChild.outerHTML.replace(/INDEX/g, questionCount);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
-        const newQuestion = tempDiv.firstElementChild;
-        container.appendChild(newQuestion);
-        questionCount++;
-        attachQuestionEvents(newQuestion);
-        applyThemeTypography();
-        applyThemeColors();
-        setActiveQuestion(newQuestion);
-    }
+        const node = template.content.cloneNode(true);
+        const item = node.querySelector('.question-item');
 
-    function removeQuestion(btn) {
-        if (document.querySelectorAll('.question-item').length > 1) {
-            const questionItem = btn.closest('.question-item');
-            questionItem.remove();
-            updateSectionLabels();
-        } else {
-            alert("La encuesta debe tener al menos una pregunta.");
-        }
-    }
+        const textInput = item.querySelector('.question-input-text');
+        const typeSelect = item.querySelector('.question-input-type');
+        const requiredInput = item.querySelector('.question-input-required');
+        const requiredChk = item.querySelector('.question-input-required-chk');
 
-    function duplicateQuestion(btn) {
-        const original = btn.closest('.question-item');
-        const clone = original.cloneNode(true);
-        const inputs = clone.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            const name = input.getAttribute('name');
-            if (name && name.startsWith('questions[')) {
-                input.setAttribute('name', name.replace(/\[\d+\]/, '[' + questionCount + ']'));
+        // Required checkbox custom UI
+        requiredChk.addEventListener('click', () => {
+            requiredChk.classList.toggle('on');
+            requiredChk.textContent = requiredChk.classList.contains('on') ? '✓' : '';
+            requiredInput.checked = requiredChk.classList.contains('on');
+            updatePreview();
+        });
+
+        if (existing) {
+            textInput.value = existing.text || '';
+            typeSelect.value = existing.type || type;
+            if (existing.required) {
+                requiredInput.checked = true;
+                requiredChk.classList.add('on');
+                requiredChk.textContent = '✓';
             }
-            if (input.type === 'text') {
-                if (name && name.includes('[options]')) {
-                    input.value = '';
+
+            // Populate scale data if available
+            if (existing.scale_min !== undefined) item.querySelector('.question-input-scale-min').value = existing.scale_min;
+            if (existing.scale_max !== undefined) item.querySelector('.question-input-scale-max').value = existing.scale_max;
+            if (existing.scale_min_label) item.querySelector('.question-input-scale-min-label').value = existing.scale_min_label;
+            if (existing.scale_max_label) item.querySelector('.question-input-scale-max-label').value = existing.scale_max_label;
+
+            // Restore options if applicable
+            const optionsContainer = item.querySelector('.options-container');
+            const baseOption = optionsContainer.querySelector('.option-item');
+            
+            // Remove initial dummy option
+            optionsContainer.querySelectorAll('.option-item').forEach((opt, idx) => {
+                 opt.remove(); 
+            });
+
+            if (existing.options && existing.options.length) {
+                existing.options.forEach(function (optText) {
+                    const clone = baseOption.cloneNode(true);
+                    clone.querySelector('.question-input-option').value = optText;
+                    setupOptionRemove(clone);
+                    optionsContainer.insertBefore(clone, optionsContainer.querySelector('.btn-add-option'));
+                });
+            } else {
+                 // If no options but type needs them, add one blank
+                 if(['multiple_choice','checkboxes','dropdown'].includes(existing.type)){
+                    const clone = baseOption.cloneNode(true);
+                    clone.querySelector('.question-input-option').value = 'Opción 1';
+                    setupOptionRemove(clone);
+                    optionsContainer.insertBefore(clone, optionsContainer.querySelector('.btn-add-option'));
+                 }
+            }
+        } else {
+            typeSelect.value = type;
+            // Setup initial option remove for new question
+            const optionsContainer = item.querySelector('.options-container');
+            setupOptionRemove(optionsContainer.querySelector('.option-item'));
+        }
+
+        setupTypeBehavior(item, typeSelect);
+
+        // Remove question
+        item.querySelector('.btn-remove-question').addEventListener('click', function () {
+            if (document.querySelectorAll('.question-item').length > 1) {
+                item.remove();
+                updatePreview();
+            }
+        });
+
+        // Add option
+        const addOptionBtn = item.querySelector('.btn-add-option');
+        addOptionBtn.addEventListener('click', function () {
+            const optionsContainer = item.querySelector('.options-container');
+            // We need a template for options. We can clone the first one found or create new
+            // Easier: clone the structure from template or JS construction
+            const row = document.createElement('div');
+            row.className = 'option-item opt-row';
+            row.innerHTML = `
+                <div class="opt-circle"></div>
+                <input type="text" class="opt-input question-input-option" value="Nueva opción">
+                <div class="opt-del btn-remove-option">✕</div>
+            `;
+            setupOptionRemove(row);
+            optionsContainer.insertBefore(row, addOptionBtn);
+            updatePreview();
+        });
+
+        container.appendChild(item);
+        questionIndex++;
+        updatePreview();
+    }
+
+    function setupOptionRemove(row) {
+        row.querySelector('.btn-remove-option').addEventListener('click', function () {
+            const container = row.parentElement;
+            if (container.querySelectorAll('.option-item').length > 1) {
+                row.remove();
+                updatePreview();
+            }
+        });
+        // Also trigger preview update on input change
+        row.querySelector('input').addEventListener('input', updatePreview);
+    }
+
+    function setupTypeBehavior(item, select) {
+        const optionsContainer = item.querySelector('.options-container');
+        const scaleConfig = item.querySelector('.scale-config');
+
+        function apply() {
+            const val = select.value;
+            // Hide options for text/date/scale types
+            const simpleTypes = ['short_text', 'paragraph', 'linear_scale', 'date', 'time'];
+            
+            if (simpleTypes.includes(val)) {
+                if (optionsContainer) optionsContainer.style.display = 'none';
+            } else {
+                if (optionsContainer) {
+                    optionsContainer.style.display = 'block';
+                    // Update icons based on type (circle vs square)
+                    const isCheck = (val === 'checkboxes');
+                    optionsContainer.querySelectorAll('.opt-circle').forEach(circle => {
+                        circle.style.borderRadius = isCheck ? '4px' : '50%';
+                    });
                 }
             }
-        });
-        document.getElementById('questions-container').appendChild(clone);
-        questionCount++;
-        attachQuestionEvents(clone);
-        applyThemeTypography();
-        applyThemeColors();
-        setActiveQuestion(clone);
-    }
 
-    function attachQuestionEvents(questionEl) {
-        questionEl.addEventListener('click', () => {
-            setActiveQuestion(questionEl);
-        });
-
-        const typeSelect = questionEl.querySelector('.question-input-type');
-        if (typeSelect) {
-            typeSelect.addEventListener('change', () => {
-                renderQuestionPreview(questionEl);
-            });
-        }
-
-        const inputs = questionEl.querySelectorAll('.question-input-text, .question-input-option');
-        inputs.forEach(input => {
-            input.addEventListener('input', () => {
-                renderQuestionPreview(questionEl);
-            });
-        });
-
-        renderQuestionPreview(questionEl);
-    }
-
-    function setActiveQuestion(questionEl) {
-        activeQuestion = questionEl;
-        const toolbar = document.getElementById('question-toolbar');
-        if (toolbar) {
-            toolbar.classList.remove('hidden');
-        }
-        positionQuestionToolbar();
-    }
-
-    function positionQuestionToolbar() {
-        const toolbar = document.getElementById('question-toolbar');
-        const form = document.getElementById('surveyForm');
-        if (!toolbar || !form || !activeQuestion) {
-            return;
-        }
-        const formRect = form.getBoundingClientRect();
-        const questionRect = activeQuestion.getBoundingClientRect();
-        const offset = questionRect.top - formRect.top + questionRect.height / 2 - toolbar.offsetHeight / 2;
-        toolbar.style.top = offset + 'px';
-    }
-
-    function getQuestionRealIndex(questionEl) {
-        const nameInput = questionEl.querySelector('input[name^="questions"][name$="[text]"]');
-        if (!nameInput) {
-            return null;
-        }
-        const match = nameInput.name.match(/\[(\d+)\]/);
-        return match ? match[1] : null;
-    }
-
-    function addImageToActiveQuestion() {
-        if (!activeQuestion) {
-            alert("Selecciona una pregunta primero.");
-            return;
-        }
-        imageDialogContext = 'question';
-        const dialog = document.getElementById('image-dialog');
-        const urlInput = document.getElementById('image-dialog-url');
-        if (!dialog || !urlInput) {
-            return;
-        }
-        const realIndex = getQuestionRealIndex(activeQuestion);
-        if (realIndex !== null) {
-            const existingBlock = activeQuestion.querySelector('.question-media-image');
-            const existingInput = existingBlock ? existingBlock.querySelector('input') : null;
-            urlInput.value = existingInput ? existingInput.value : '';
-        } else {
-            urlInput.value = '';
-        }
-        dialog.classList.remove('hidden');
-    }
-
-    function addVideoToActiveQuestion() {
-        if (!activeQuestion) {
-            alert("Selecciona una pregunta primero.");
-            return;
-        }
-        const realIndex = getQuestionRealIndex(activeQuestion);
-        if (realIndex === null) {
-            return;
-        }
-        let block = activeQuestion.querySelector('.question-media-video');
-        if (!block) {
-            block = document.createElement('div');
-            block.className = 'question-media-video flex items-center gap-3 px-6 pb-3';
-            block.innerHTML = `
-                <i class="fab fa-youtube text-red-500"></i>
-                <div class="flex-1">
-                    <input type="text" name="questions[${realIndex}][video_url]" class="question-input-video w-full border-b border-gray-300 focus:border-[#006838] focus:outline-none text-sm text-gray-700" placeholder="URL del video (YouTube)">
-                </div>
-            `;
-            const reference = activeQuestion.querySelector('.question-media-image') || activeQuestion.querySelector('.grid');
-            if (reference) {
-                reference.insertAdjacentElement('afterend', block);
+            // Scale config visibility
+            if (val === 'linear_scale') {
+                if (scaleConfig) scaleConfig.style.display = 'block';
             } else {
-                activeQuestion.appendChild(block);
+                if (scaleConfig) scaleConfig.style.display = 'none';
             }
-        } else {
-            const input = block.querySelector('input');
-            input.name = `questions[${realIndex}][video_url]`;
         }
-        const input = block.querySelector('input');
-        const url = prompt("Pega la URL del video", input.value || "");
-        if (url !== null && url.trim() !== "") {
-            input.value = url.trim();
+
+        select.addEventListener('change', function () {
+            apply();
+            updatePreview();
+        });
+
+        // Listen for changes in scale config to update preview
+        if (scaleConfig) {
+            const minSelect = scaleConfig.querySelector('.question-input-scale-min');
+            const maxSelect = scaleConfig.querySelector('.question-input-scale-max');
+            const minLabelInput = scaleConfig.querySelector('.question-input-scale-min-label');
+            const maxLabelInput = scaleConfig.querySelector('.question-input-scale-max-label');
+            const minPreview = scaleConfig.querySelector('.scale-label-preview-min');
+            const maxPreview = scaleConfig.querySelector('.scale-label-preview-max');
+
+            function updateScaleLabels() {
+                if (minPreview) minPreview.textContent = minSelect.value;
+                if (maxPreview) maxPreview.textContent = maxSelect.value;
+                updatePreview();
+            }
+
+            minSelect.addEventListener('change', updateScaleLabels);
+            maxSelect.addEventListener('change', updateScaleLabels);
+            minLabelInput.addEventListener('input', updatePreview);
+            maxLabelInput.addEventListener('input', updatePreview);
         }
+
+        apply();
     }
 
-    function addSection() {
+    function syncQuestionsToInputs() {
         const container = document.getElementById('questions-container');
-        const template = document.getElementById('section-template');
-        if (!container || !template) {
-            return;
-        }
-        const clone = template.content.cloneNode(true);
-        const html = clone.firstElementChild.outerHTML.replace(/INDEX/g, questionCount);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
-        const newSection = tempDiv.firstElementChild;
-        if (activeQuestion && activeQuestion.parentElement === container) {
-            activeQuestion.insertAdjacentElement('afterend', newSection);
-        } else {
-            container.appendChild(newSection);
-        }
-        questionCount++;
-        attachQuestionEvents(newSection);
-        applyThemeTypography();
-        applyThemeColors();
-        setActiveQuestion(newSection);
-        updateSectionLabels();
-    }
+        const items = container.querySelectorAll('.question-item');
 
-    function toggleOptions(select) {
-        const questionItem = select.closest('.question-item');
-        const optionsContainer = questionItem.querySelector('.options-container');
-        const simpleTypes = ['short_text', 'paragraph', 'linear_scale', 'rating', 'date', 'time'];
-        if (simpleTypes.includes(select.value)) {
-            optionsContainer.style.display = 'none';
-        } else {
-            optionsContainer.style.display = 'block';
-            const icons = optionsContainer.querySelectorAll('i.far');
-            icons.forEach(icon => {
-                icon.className = select.value === 'checkboxes' ? 'far fa-square text-gray-400' : 'far fa-circle text-gray-400';
+        // Clear old hidden inputs if any (usually form submission handles this, but we rename attributes)
+        // We actually just need to ensure the name attributes are correct before submit
+        
+        let index = 0;
+        items.forEach(function (item) {
+            const textInput = item.querySelector('.question-input-text');
+            const typeSelect = item.querySelector('.question-input-type');
+            const requiredInput = item.querySelector('.question-input-required');
+            const options = item.querySelectorAll('.question-input-option');
+
+            textInput.setAttribute('name', 'questions[' + index + '][text]');
+            typeSelect.setAttribute('name', 'questions[' + index + '][type]');
+            requiredInput.setAttribute('name', 'questions[' + index + '][required]');
+
+            // Scale inputs
+            const scaleMin = item.querySelector('.question-input-scale-min');
+            const scaleMax = item.querySelector('.question-input-scale-max');
+            const scaleMinLabel = item.querySelector('.question-input-scale-min-label');
+            const scaleMaxLabel = item.querySelector('.question-input-scale-max-label');
+
+            if (scaleMin) scaleMin.setAttribute('name', 'questions[' + index + '][scale_min]');
+            if (scaleMax) scaleMax.setAttribute('name', 'questions[' + index + '][scale_max]');
+            if (scaleMinLabel) scaleMinLabel.setAttribute('name', 'questions[' + index + '][scale_min_label]');
+            if (scaleMaxLabel) scaleMaxLabel.setAttribute('name', 'questions[' + index + '][scale_max_label]');
+
+            let optIndex = 0;
+            options.forEach(function (opt) {
+                opt.setAttribute('name', 'questions[' + index + '][options][' + optIndex + ']');
+                optIndex++;
             });
-        }
-    }
 
-    function renderQuestionPreview(questionItem) {
-        const preview = questionItem.querySelector('.question-control-preview');
-        if (!preview) {
-            return;
-        }
-
-        const typeSelect = questionItem.querySelector('.question-input-type');
-        const type = typeSelect ? typeSelect.value : 'short_text';
-
-        const simpleTypes = ['short_text', 'paragraph', 'linear_scale', 'rating', 'date', 'time'];
-        if (!simpleTypes.includes(type)) {
-            preview.innerHTML = '';
-            return;
-        }
-
-        let html = '';
-
-        if (type === 'short_text') {
-            html = `
-                <div class="border-b border-gray-300 py-2 text-gray-400 text-sm">
-                    Escribe tu respuesta
-                </div>
-            `;
-        } else if (type === 'paragraph') {
-            html = `
-                <div class="border border-gray-300 rounded-lg px-3 py-2 text-gray-400 text-sm">
-                    Escribe una respuesta larga
-                </div>
-            `;
-        } else if (type === 'linear_scale') {
-            let scaleHtml = '<div class="flex items-center gap-4">';
-            for (let i = 1; i <= 5; i++) {
-                scaleHtml += `
-                    <div class="flex flex-col items-center gap-1 text-xs text-gray-500">
-                        <span class="w-3 h-3 rounded-full border border-gray-400"></span>
-                        <span>${i}</span>
-                    </div>
-                `;
-            }
-            scaleHtml += '</div>';
-            html = scaleHtml;
-        } else if (type === 'rating') {
-            html = `
-                <div class="flex items-center gap-1 text-yellow-400">
-                    <span class="text-lg">★</span>
-                    <span class="text-lg">★</span>
-                    <span class="text-lg">★</span>
-                    <span class="text-lg">★</span>
-                    <span class="text-lg">★</span>
-                </div>
-            `;
-        } else if (type === 'date') {
-            html = `
-                <div class="inline-flex items-center border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-500 bg-white">
-                    dd/mm/aaaa
-                </div>
-            `;
-        } else if (type === 'time') {
-            html = `
-                <div class="inline-flex items-center border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-500 bg-white">
-                    hh:mm
-                </div>
-            `;
-        }
-
-        preview.innerHTML = html;
-    }
-
-    function addOption(btn, indexPlaceholder) {
-        const optionsContainer = btn.closest('.options-container');
-        const questionItem = btn.closest('.question-item');
-        const nameAttr = questionItem.querySelector('input[name^="questions"]').name;
-        const realIndex = nameAttr.match(/\[(\d+)\]/)[1];
-        const newOption = document.createElement('div');
-        newOption.className = 'option-item flex items-center gap-3';
-        const typeSelect = questionItem.querySelector('select');
-        const iconClass = typeSelect.value === 'checkboxes' ? 'far fa-square' : 'far fa-circle';
-
-        newOption.innerHTML = `
-            <i class="${iconClass} text-gray-500"></i>
-            <input type="text" name="questions[${realIndex}][options][]" class="question-input-option flex-1 border-b border-dotted border-gray-400 focus:border-[#006838] focus:outline-none text-sm text-gray-700" placeholder="Opción">
-            <button type="button" onclick="removeOption(this)" class="text-gray-400 hover:text-red-500 transition">
-                <i class="fas fa-close text-xs"></i>
-            </button>
-        `;
-        optionsContainer.insertBefore(newOption, btn);
-    }
-
-    function removeOption(btn) {
-        const container = btn.closest('.options-container');
-        if (container.querySelectorAll('.option-item').length > 1) {
-            btn.closest('.option-item').remove();
-        }
-    }
-
-    function updateSectionLabels() {
-        const sections = document.querySelectorAll('.question-item[data-section="true"]');
-        const total = sections.length;
-        sections.forEach((section, index) => {
-            const label = section.querySelector('.section-label');
-            if (label) {
-                label.textContent = `Sección ${index + 1} de ${total}`;
-            }
+            index++;
         });
     }
 
-    function openImageDialog(context) {
-        imageDialogContext = context;
-        const dialog = document.getElementById('image-dialog');
-        const urlInput = document.getElementById('image-dialog-url');
-        if (!dialog || !urlInput) {
-            return;
-        }
-        urlInput.value = '';
-        dialog.classList.remove('hidden');
-    }
-
-    function closeImageDialog() {
-        const dialog = document.getElementById('image-dialog');
-        if (dialog) {
-            dialog.classList.add('hidden');
-        }
-        imageDialogContext = null;
-    }
-
-    function confirmImageDialog() {
-        const urlInput = document.getElementById('image-dialog-url');
-        if (!urlInput || !urlInput.value.trim()) {
-            alert('Escribe la URL de la imagen.');
-            return;
-        }
-        const url = urlInput.value.trim();
-        if (imageDialogContext === 'header') {
-            const hiddenInput = document.getElementById('header-image-input');
-            const headerContainer = document.getElementById('header-image-container');
-            const headerPreview = document.getElementById('header-image-preview');
-            if (hiddenInput && headerContainer && headerPreview) {
-                hiddenInput.value = url;
-                headerPreview.src = url;
-                headerContainer.classList.remove('hidden');
-            }
-        } else if (imageDialogContext === 'question') {
-            if (!activeQuestion) {
-                alert('Selecciona una pregunta primero.');
-                return;
-            }
-            const realIndex = getQuestionRealIndex(activeQuestion);
-            if (realIndex === null) {
-                return;
-            }
-            let block = activeQuestion.querySelector('.question-media-image');
-            if (!block) {
-                block = document.createElement('div');
-                block.className = 'question-media-image flex items-center gap-3 px-6 pb-3';
-                block.innerHTML = `
-                    <i class="far fa-image text-gray-400"></i>
-                    <div class="flex-1">
-                        <input type="text" name="questions[${realIndex}][image_url]" class="question-input-image w-full border-b border-gray-300 focus:border-[#006838] focus:outline-none text-sm text-gray-700" placeholder="URL de la imagen">
-                    </div>
-                `;
-                const gridRow = activeQuestion.querySelector('.grid');
-                if (gridRow) {
-                    gridRow.insertAdjacentElement('afterend', block);
-                } else {
-                    activeQuestion.appendChild(block);
-                }
-            } else {
-                const inputExisting = block.querySelector('input');
-                inputExisting.name = `questions[${realIndex}][image_url]`;
-            }
-            const input = block.querySelector('input');
-            input.value = url;
-        }
-        closeImageDialog();
-    }
-
-    function toggleThemePanel() {
-        const panel = document.getElementById('theme-panel');
-        if (panel) {
-            panel.classList.toggle('hidden');
-        }
-    }
-
-    function initThemePanel() {
-        const headerFontSelect = document.getElementById('theme-header-font');
-        const questionFontSelect = document.getElementById('theme-question-font');
-        const textFontSelect = document.getElementById('theme-text-font');
-        const headerSizeSelect = document.getElementById('theme-header-size');
-        const questionSizeSelect = document.getElementById('theme-question-size');
-        const textSizeSelect = document.getElementById('theme-text-size');
-
-        [headerFontSelect, questionFontSelect, textFontSelect, headerSizeSelect, questionSizeSelect, textSizeSelect].forEach(el => {
-            if (el) {
-                el.addEventListener('change', applyThemeTypography);
-            }
-        });
-
-        document.querySelectorAll('[data-theme-primary]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                themePrimaryColor = btn.getAttribute('data-theme-primary');
-                applyThemeColors();
-            });
-        });
-
-        document.querySelectorAll('[data-theme-bg]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                themeBackgroundColor = btn.getAttribute('data-theme-bg');
-                applyThemeBackground();
-            });
-        });
-
-        applyThemeTypography();
-        applyThemeColors();
-        applyThemeBackground();
-    }
-
-    function applyThemeColors() {
-        const headerCard = document.querySelector('[data-header-card]');
-        if (headerCard) {
-            headerCard.style.borderTopColor = themePrimaryColor;
-        }
-        const addButton = document.querySelector('.btn-add-question');
-        if (addButton) {
-            addButton.style.backgroundColor = themePrimaryColor;
-        }
-        const saveButton = document.querySelector('.btn-save-form');
-        if (saveButton) {
-            saveButton.style.backgroundColor = themePrimaryColor;
-        }
-        document.querySelectorAll('.accent-bar').forEach(bar => {
-            bar.style.backgroundColor = themePrimaryColor;
-        });
-        document.querySelectorAll('[data-theme-primary]').forEach(btn => {
-            const value = btn.getAttribute('data-theme-primary');
-            btn.style.borderColor = value === themePrimaryColor ? 'rgba(0,0,0,0.6)' : 'transparent';
-        });
-    }
-
-    function applyThemeBackground() {
-        const root = document.getElementById('builder-root');
-        if (root) {
-            root.style.backgroundColor = themeBackgroundColor;
-        }
-    }
-
-    function applyThemeTypography() {
-        const headerFont = document.getElementById('theme-header-font')?.value || '';
-        const questionFont = document.getElementById('theme-question-font')?.value || '';
-        const textFont = document.getElementById('theme-text-font')?.value || '';
-        const headerSize = document.getElementById('theme-header-size')?.value || '32';
-        const questionSize = document.getElementById('theme-question-size')?.value || '14';
-        const textSize = document.getElementById('theme-text-size')?.value || '14';
-
-        const title = document.getElementById('input-title');
-        const desc = document.getElementById('input-description');
-        if (title) {
-            title.style.fontFamily = headerFont;
-            title.style.fontSize = headerSize + 'px';
-        }
-        if (desc) {
-            desc.style.fontFamily = textFont;
-            desc.style.fontSize = textSize + 'px';
-        }
-        document.querySelectorAll('.question-input-text').forEach(el => {
-            el.style.fontFamily = questionFont;
-            el.style.fontSize = questionSize + 'px';
-        });
-        document.querySelectorAll('.question-item .question-input-option').forEach(el => {
-            el.style.fontFamily = textFont;
-            el.style.fontSize = textSize + 'px';
-        });
-    }
-
-    function focusSurveyTitle() {
+    function updatePreview() {
         const titleInput = document.getElementById('input-title');
-        if (titleInput) {
-            titleInput.focus();
+        const descInput = document.getElementById('input-description');
+        const previewTitle = document.getElementById('preview-title');
+        const previewDescription = document.getElementById('preview-description');
+        const previewQuestions = document.getElementById('preview-questions');
+
+        previewTitle.textContent = titleInput.value || 'Sin título';
+        previewDescription.textContent = descInput.value || 'Sin descripción';
+
+        previewQuestions.innerHTML = '';
+
+        const items = document.querySelectorAll('.question-item');
+        if (items.length === 0) {
+            previewQuestions.innerHTML = '<div class="text-center text-muted" style="padding:20px; font-size:12px;">Agrega preguntas...</div>';
+            return;
         }
+
+        let number = 1;
+        items.forEach(function (item) {
+            const text = item.querySelector('.question-input-text').value || 'Pregunta...';
+            const type = item.querySelector('.question-input-type').value;
+            const required = item.querySelector('.question-input-required').checked;
+
+            const block = document.createElement('div');
+            block.style.marginBottom = '16px';
+
+            const label = document.createElement('div');
+            label.className = 'pv-q';
+            label.textContent = number + '. ' + text + (required ? ' *' : '');
+            block.appendChild(label);
+
+            if (['multiple_choice', 'checkboxes', 'dropdown'].includes(type)) {
+                const options = item.querySelectorAll('.question-input-option');
+                options.forEach(function (opt) {
+                    const row = document.createElement('div');
+                    row.className = 'pv-opt';
+                    
+                    const circle = document.createElement('div');
+                    circle.className = 'pv-opt-circle';
+                    if (type === 'checkboxes') circle.style.borderRadius = '3px';
+                    
+                    const span = document.createElement('span');
+                    span.textContent = opt.value || 'Opción';
+                    
+                    row.appendChild(circle);
+                    row.appendChild(span);
+                    block.appendChild(row);
+                });
+            } else if (type === 'short_text') {
+                const line = document.createElement('div');
+                line.style.height = '24px';
+                line.style.background = 'rgba(0,0,0,0.03)';
+                line.style.borderRadius = '6px';
+                line.style.marginTop = '6px';
+                line.style.border = '1px solid rgba(0,0,0,0.05)';
+                block.appendChild(line);
+            } else if (type === 'paragraph') {
+                const box = document.createElement('div');
+                box.style.height = '60px';
+                box.style.background = 'rgba(0,0,0,0.03)';
+                box.style.borderRadius = '6px';
+                box.style.marginTop = '6px';
+                box.style.border = '1px solid rgba(0,0,0,0.05)';
+                block.appendChild(box);
+            } else if (type === 'linear_scale') {
+                const min = parseInt(item.querySelector('.question-input-scale-min').value);
+                const max = parseInt(item.querySelector('.question-input-scale-max').value);
+                const minLabel = item.querySelector('.question-input-scale-min-label').value;
+                const maxLabel = item.querySelector('.question-input-scale-max-label').value;
+
+                const wrapper = document.createElement('div');
+                wrapper.style.marginTop = '16px';
+                wrapper.style.padding = '0 10px';
+                
+                // Circles row
+                const circles = document.createElement('div');
+                circles.style.display = 'flex';
+                circles.style.justifyContent = 'space-between';
+                circles.style.alignItems = 'flex-end';
+                
+                // Start label
+                if (minLabel) {
+                     const l = document.createElement('div');
+                     l.textContent = minLabel;
+                     l.style.fontSize = '12px';
+                     l.style.color = '#64748b';
+                     l.style.marginBottom = '6px';
+                     l.style.marginRight = '12px';
+                     l.style.maxWidth = '80px';
+                     circles.appendChild(l);
+                }
+
+                const numbersContainer = document.createElement('div');
+                numbersContainer.style.display = 'flex';
+                numbersContainer.style.gap = '12px';
+                numbersContainer.style.flex = '1';
+                numbersContainer.style.justifyContent = 'space-around';
+
+                for (let i = min; i <= max; i++) {
+                    const col = document.createElement('div');
+                    col.style.display = 'flex';
+                    col.style.flexDirection = 'column';
+                    col.style.alignItems = 'center';
+                    col.style.gap = '8px';
+                    
+                    const num = document.createElement('span');
+                    num.textContent = i;
+                    num.style.fontSize = '12px';
+                    num.style.color = '#64748b';
+                    
+                    const circle = document.createElement('div');
+                    circle.style.width = '24px';
+                    circle.style.height = '24px';
+                    circle.style.borderRadius = '50%';
+                    circle.style.border = '2px solid #cbd5e1';
+                    circle.style.backgroundColor = '#fff';
+                    
+                    col.appendChild(num);
+                    col.appendChild(circle);
+                    numbersContainer.appendChild(col);
+                }
+                circles.appendChild(numbersContainer);
+
+                // End label
+                if (maxLabel) {
+                     const l = document.createElement('div');
+                     l.textContent = maxLabel;
+                     l.style.fontSize = '12px';
+                     l.style.color = '#64748b';
+                     l.style.marginBottom = '6px';
+                     l.style.marginLeft = '12px';
+                     l.style.maxWidth = '80px';
+                     l.style.textAlign = 'right';
+                     circles.appendChild(l);
+                }
+
+                wrapper.appendChild(circles);
+                block.appendChild(wrapper);
+            } else if (type === 'date') {
+                const dateInput = document.createElement('div');
+                dateInput.style.borderBottom = '1px solid #e2e8f0';
+                dateInput.style.color = '#94a3b8';
+                dateInput.style.width = '160px';
+                dateInput.style.padding = '8px 0';
+                dateInput.style.marginTop = '16px';
+                dateInput.style.fontSize = '14px';
+                dateInput.innerHTML = '<span style="margin-right:8px">📅</span> dd/mm/aaaa';
+                block.appendChild(dateInput);
+            }
+
+            previewQuestions.appendChild(block);
+            number++;
+        });
     }
 </script>
 @endpush

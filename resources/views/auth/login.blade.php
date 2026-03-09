@@ -334,33 +334,6 @@
   .btn-login:hover::after { opacity: 1; }
   .btn-login:active { transform: translateY(0); }
 
-  .btn-uaemex {
-    width: 100%;
-    padding: 15px 24px;
-    background: transparent;
-    color: var(--verde-oscuro);
-    border: 2px solid var(--verde);
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.25s ease;
-    margin-top: 12px;
-  }
-  .btn-uaemex:hover {
-    background: var(--verde-menta);
-    color: var(--verde-oscuro);
-    transform: translateY(-2px);
-  }
-  .btn-uaemex:active { transform: translateY(0); }
-
   .demo-box {
     margin-top: 24px;
     background: var(--crema);
@@ -565,14 +538,6 @@
             <line x1="15" y1="12" x2="3" y2="12"/>
           </svg>
           Iniciar Sesión
-        </button>
-
-        <button type="submit" formaction="{{ route('login.uaemex') }}" formnovalidate class="btn-uaemex">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          Ingresar con Correo Institucional
         </button>
 
       </form>

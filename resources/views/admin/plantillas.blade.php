@@ -5,127 +5,107 @@
 @section('content')
 <div class="ph">
     <div class="ph-left">
-        <div class="ph-label">CONFIGURACIÓN</div>
-        <h1 class="ph-title">Plantillas Globales</h1>
-        <div class="ph-sub">Gestiona las plantillas base para encuestas</div>
+        <div class="ph-label">Administración</div>
+        <div class="ph-title">Plantillas Globales</div>
+        <div class="ph-sub">Gestiona las plantillas base que usarán los editores</div>
     </div>
-</div>
-
-<div class="dash-grid">
-    <!-- TOP BAR: CREATE/EDIT FORM -->
-    <div style="grid-column: span 12;">
-        <form method="POST" action="{{ isset($editingTemplate) ? route('admin.plantillas.update', $editingTemplate) : route('admin.plantillas.store') }}" class="filter-neu">
+    <div class="ph-actions" style="flex-wrap:wrap;">
+        <form method="POST" action="{{ isset($editingTemplate) ? route('admin.plantillas.update', $editingTemplate) : route('admin.plantillas.store') }}" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             @csrf
-            @if(isset($editingTemplate)) @method('PUT') @endif
-            
-            <div class="fn-label">
-                {{ isset($editingTemplate) ? 'EDITANDO PLANTILLA:' : 'NUEVA PLANTILLA:' }}
-            </div>
-
-            <div class="fn-search">
-                <input type="text" name="name" class="fn-input" placeholder="Nombre de la plantilla..." value="{{ old('name', isset($editingTemplate) ? $editingTemplate->name : '') }}" style="width:100%;">
-            </div>
-
-            <select name="category" class="fn-input">
+            @if(isset($editingTemplate))
+                @method('PUT')
+            @endif
+            <input type="text" name="name" placeholder="Nombre de plantilla" value="{{ old('name', isset($editingTemplate) ? $editingTemplate->name : '') }}" class="form-input" style="width:auto; min-width:200px;">
+            <select name="category" class="form-input" style="width:auto; min-width:180px; padding-right:34px;">
                 @foreach($categories as $category)
-                <option value="{{ $category }}" {{ old('category', isset($editingTemplate) ? $editingTemplate->category : null) === $category ? 'selected' : '' }}>
-                    {{ $category }}
-                </option>
+                    <option value="{{ $category }}" @if(old('category', isset($editingTemplate) ? $editingTemplate->category : null) === $category) selected @endif>
+                        {{ $category }}
+                    </option>
                 @endforeach
             </select>
-
-            <label class="badge-neu bn-muted" style="cursor:pointer; background:transparent; box-shadow:none;">
-                <input type="checkbox" name="is_mandatory" value="1" {{ old('is_mandatory', isset($editingTemplate) ? $editingTemplate->is_mandatory : false) ? 'checked' : '' }} style="margin-right:6px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--text-muted);">
+                <input type="checkbox" name="is_mandatory" value="1" @if(old('is_mandatory', isset($editingTemplate) ? $editingTemplate->is_mandatory : false)) checked @endif>
                 Obligatoria
             </label>
-
             <button type="submit" class="btn btn-solid btn-sm">
-                <i class="fas fa-plus"></i> {{ isset($editingTemplate) ? 'Actualizar' : 'Crear' }}
+                {{ isset($editingTemplate) ? 'Actualizar' : 'Nueva' }}
             </button>
         </form>
     </div>
+</div>
 
-    <!-- LEFT COLUMN: LIST -->
-    <div style="grid-column: span 8;">
-        <div class="nc">
-            <div class="cc-header">
-                <div class="cc-title">Lista de Plantillas</div>
-                <div class="tab-group">
-                    @foreach($categories as $category)
-                    <div class="tg-tab">{{ $category }}</div>
-                    @endforeach
-                </div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+    <div class="neu-card" style="margin-bottom:0; grid-column: span 2; padding:22px;">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-layer-group text-uaemex"></i>
+                Lista de plantillas
+            </h2>
+            <div class="flex gap-2">
+                @foreach($categories as $category)
+                    <button class="btn btn-neu btn-sm" type="button" style="padding:6px 12px;">
+                        {{ $category }}
+                    </button>
+                @endforeach
             </div>
+        </div>
 
-            <div class="rc-list">
-                @forelse($templates as $template)
-                <div class="rc-item">
-                    <div class="rc-top">
-                        <div class="rc-name">{{ $template->name }}</div>
-                        <div class="rc-num" style="display:flex; gap:8px;">
-                            <a href="{{ route('admin.plantillas.edit', $template) }}" style="color:var(--text-muted);"><i class="fas fa-pen"></i></a>
-                            
-                            <form method="POST" action="{{ route('admin.plantillas.destroy', $template) }}" style="display:inline;">
-                                @csrf @method('DELETE')
-                                <button type="submit" style="border:none; background:none; color:var(--red); cursor:pointer;"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="rc-bar-wrap" style="justify-content:space-between;">
-                        <span class="badge-neu bn-muted" style="font-size:9px;">{{ $template->category }}</span>
+        <div class="space-y-3">
+            @forelse($templates as $template)
+                <div style="background:var(--bg); border-radius:var(--radius); box-shadow:var(--neu-in-sm); padding:16px; display:flex; align-items:center; justify-content:space-between; gap:14px;">
+                    <div>
+                        <p style="font-weight:800; color:var(--text-dark);">{{ $template->name }}</p>
+                        <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">{{ $template->category }}</p>
                         @if($template->is_mandatory)
-                        <span class="badge-neu bn-gold" style="font-size:9px;"><i class="fas fa-star"></i> OBLIGATORIA</span>
+                            <span class="status-pill status-pending" style="background:var(--bg); margin-top:8px;">
+                                Obligatoria
+                            </span>
                         @endif
                     </div>
+                    <div class="flex items-center gap-2">
+                        <a
+                            href="{{ route('admin.plantillas.edit', $template) }}"
+                            class="btn btn-neu btn-sm"
+                        >
+                            Editar
+                        </a>
+                        <form method="POST" action="{{ route('admin.plantillas.destroy', $template) }}">
+                            @csrf
+                            @method('DELETE')
+                            <button
+                                type="submit"
+                                class="btn btn-danger btn-sm"
+                            >
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                @empty
-                <div class="nc-inset" style="text-align:center; color:var(--text-muted);">
-                    No hay plantillas registradas.
-                </div>
-                @endforelse
-            </div>
+            @empty
+                <div style="text-align:center; color:var(--text-muted); padding:24px;">Aún no hay plantillas creadas.</div>
+            @endforelse
         </div>
     </div>
 
-    <!-- RIGHT COLUMN: PREVIEW -->
-    <div style="grid-column: span 4;">
-        <div class="nc">
-            <div class="cc-header">
-                <div class="cc-title">Vista Previa</div>
-            </div>
-            
-            <div class="nc-inset" style="font-size:12px; color:var(--text-muted); line-height:1.6;">
-                <strong style="color:var(--text-dark);">Estructura Base:</strong><br>
-                1. Título y Descripción<br>
-                2. Datos Demográficos<br>
-                3. Preguntas de la Categoría<br>
-                4. Comentarios Finales
-            </div>
-
-            <div class="uc-stats" style="margin-top:16px;">
-                <div class="uc-stat">
-                    <div class="uc-stat-val">4</div>
-                    <div class="uc-stat-label">Secciones</div>
-                </div>
-                <div class="uc-stat">
-                    <div class="uc-stat-val">12</div>
-                    <div class="uc-stat-label">Preguntas</div>
-                </div>
-            </div>
-
-            <div class="fg" style="margin-top:16px;">
-                <label>Configuración Rápida</label>
-                <div class="fg-row" style="grid-template-columns:1fr;">
-                    <div class="badge-neu bn-muted" style="justify-content:space-between;">
-                        <span>Requiere Login</span>
-                        <i class="fas fa-check" style="color:var(--verde);"></i>
-                    </div>
-                    <div class="badge-neu bn-muted" style="justify-content:space-between;">
-                        <span>Anónima</span>
-                        <i class="fas fa-times" style="color:var(--red);"></i>
-                    </div>
-                </div>
-            </div>
+    <div class="neu-card" style="margin-bottom:0; padding:22px;">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-file-alt text-uaemex"></i>
+            Preview de plantilla
+        </h2>
+        <p class="text-sm text-gray-600 mb-3">
+            Aquí se mostrará una previsualización interactiva de la plantilla seleccionada: estructura de secciones, tipo de preguntas y lógica básica.
+        </p>
+        <div style="background:var(--bg-light); border-radius:var(--radius); padding:14px; box-shadow:var(--neu-in-sm); font-size:12px; color:var(--text-muted); display:flex; flex-direction:column; gap:6px;">
+            <p style="font-weight:800; color:var(--text);">Ejemplo:</p>
+            <p>Título: Encuesta de Satisfacción General</p>
+            <p>Secciones: Datos generales, Satisfacción, Comentarios.</p>
+            <p>Preguntas tipo: escala Likert, opción múltiple y campo abierto.</p>
+        </div>
+        <div class="mt-4">
+            <label style="display:flex; align-items:center; gap:10px; font-size:12px; color:var(--text-muted);">
+                <input type="checkbox" class="rounded border-gray-300 text-uaemex focus:ring-uaemex">
+                Marcar como obligatoria para los editores
+            </label>
         </div>
     </div>
 </div>

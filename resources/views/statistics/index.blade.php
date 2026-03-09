@@ -1,250 +1,224 @@
 @extends('layouts.admin')
 
-@section('title', 'Estadísticas')
+@section('title', 'Estadísticas del Sistema')
 
 @section('content')
-<div class="ph">
-    <div>
-        <div class="ph-label">Análisis</div>
-        <div class="ph-title">Estadísticas</div>
-        <div class="ph-sub">Métricas y rendimiento de encuestas</div>
-    </div>
-</div>
-
-<div class="filter-neu mb-8" style="margin-bottom: 32px;">
-    <form action="{{ route('statistics.index') }}" method="GET" class="contents" style="display: contents;">
-        <div class="fn-label">Encuesta:</div>
-        <select name="survey_id" onchange="this.form.submit()" class="fn-input fg-sel" style="width: auto; min-width: 200px;">
-            @foreach($surveys as $survey)
-            <option value="{{ $survey->id }}" {{ $selectedSurvey && $selectedSurvey->id == $survey->id ? 'selected' : '' }}>
-                {{ $survey->title }} ({{ \Carbon\Carbon::parse($survey->start_date)->year }})
-            </option>
-            @endforeach
-            @if($surveys->isEmpty())
-            <option value="">No hay encuestas disponibles</option>
-            @endif
-        </select>
-
-        <div class="fn-label" style="margin-left: 16px;">Desde:</div>
-        <input type="date" name="from_date" value="{{ request('from_date') }}" class="fn-input" style="width:auto; color:var(--text-muted);">
-
-        <div class="fn-label">Hasta:</div>
-        <input type="date" name="to_date" value="{{ request('to_date') }}" class="fn-input" style="width:auto; color:var(--text-muted);">
-
-        <button type="submit" class="btn btn-sm btn-solid" style="margin-left:auto;">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            Aplicar
-        </button>
-    </form>
-</div>
-
-@if($selectedSurvey)
-<div class="stats-layout">
-    <div class="stats-top">
-        <!-- Total Responses Gauge -->
-        <div class="gauge-card">
-            <div class="gauge-circle">
-                <div class="gauge-inner">
-                    <div class="gauge-val">{{ $stats['total_responses'] }}</div>
-                    <div class="gauge-unit">TOTAL</div>
-                </div>
-            </div>
-            <div class="gauge-info">
-                <div class="gauge-name">Respuestas Totales</div>
-                <div class="gauge-sub">
-                    <span style="color: {{ $stats['responses_growth'] >= 0 ? 'var(--verde)' : 'var(--red)' }}; font-weight:700;">
-                        {{ $stats['responses_growth'] >= 0 ? '+' : '' }}{{ $stats['responses_growth'] }}%
-                    </span>
-                    vs periodo anterior
-                </div>
-            </div>
+    {{-- HEADER --}}
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px;">
+        <div>
+            <div style="font-size:11px; font-weight:800; color:var(--oro); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">ANÁLISIS</div>
+            <h1 style="font-family:'Sora',sans-serif; font-size:32px; font-weight:700; color:var(--text-dark); margin-bottom:8px;">Estadísticas del Sistema</h1>
+            <p style="color:var(--text-muted);">Métricas de respuestas, participación y tendencias</p>
         </div>
-
-        <!-- Completion Rate Gauge -->
-        <div class="gauge-card">
-            <div class="gauge-circle">
-                <div class="gauge-inner">
-                    <div class="gauge-val">{{ $stats['completion_rate'] }}</div>
-                    <div class="gauge-unit">%</div>
-                </div>
-            </div>
-            <div class="gauge-info">
-                <div class="gauge-name">Tasa de Completado</div>
-                <div class="gauge-sub">
-                    <span style="color: {{ $stats['completion_growth'] >= 0 ? 'var(--verde)' : 'var(--red)' }}; font-weight:700;">
-                        {{ $stats['completion_growth'] >= 0 ? '+' : '' }}{{ $stats['completion_growth'] }}%
-                    </span>
-                    vs periodo anterior
-                </div>
-            </div>
+        <div>
+            <button class="btn-neu" style="padding:10px 20px; font-weight:700; display:flex; align-items:center; gap:8px; color:var(--text-dark);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Exportar
+            </button>
         </div>
     </div>
 
-    <div class="stats-bottom">
-        <div class="scatter-card" style="grid-column: 1 / -1;">
-            <!-- Use full width for main chart -->
-            <div class="sc-head" style="display:flex; justify-content:space-between; align-items:center;">
-                <div class="sc-title" style="font-size:16px; font-weight:700; color:var(--text-dark);">Evolución de Respuestas</div>
-            </div>
-            <div class="sc-dots" style="height: 300px;">
-                <canvas id="evolutionChart" style="width:100%; height:100%;"></canvas>
-            </div>
-        </div>
-
-        <div class="scatter-card">
-            <div class="sc-head" style="display:flex; justify-content:space-between; align-items:center;">
-                <div class="sc-title" style="font-size:16px; font-weight:700; color:var(--text-dark);">Distribución</div>
-            </div>
-            <div class="sc-dots" style="height: 250px;">
-                <canvas id="distributionChart" style="width:100%; height:100%;"></canvas>
-            </div>
-        </div>
-
-        <div class="scatter-card">
-            <div class="sc-head" style="display:flex; justify-content:space-between; align-items:center;">
-                <div class="sc-title" style="font-size:16px; font-weight:700; color:var(--text-dark);">Respuestas Recientes</div>
-                <div class="sc-actions" style="display:flex; gap:8px;">
-                    <!-- Export buttons could go here -->
+    {{-- FILTERS --}}
+    <div class="neu-card" style="padding:16px 24px; margin-bottom:30px; display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+        <form action="{{ route('statistics.index') }}" method="GET" style="display:contents;">
+            
+            {{-- Survey Select --}}
+            <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:280px;">
+                <label style="font-weight:700; color:var(--text-muted); font-size:13px;">Encuesta:</label>
+                <div style="position:relative; flex:1;">
+                    <select name="survey_id" onchange="this.form.submit()" 
+                        style="width:100%; appearance:none; background:var(--bg); border:none; padding:10px 16px; border-radius:12px; font-size:13px; font-weight:600; color:var(--text-dark); box-shadow:var(--neu-in-sm); cursor:pointer; outline:none;">
+                        @foreach($surveys as $survey)
+                            <option value="{{ $survey->id }}" {{ $selectedSurvey && $selectedSurvey->id == $survey->id ? 'selected' : '' }}>
+                                {{ $survey->title }} ({{ \Carbon\Carbon::parse($survey->start_date)->year }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <div style="position:absolute; right:14px; top:50%; transform:translateY(-50%); pointer-events:none; color:var(--text-muted);">▼</div>
                 </div>
             </div>
-            <div class="table-neu-container" style="margin-top:16px;">
-                <table style="width:100%; border-collapse:collapse; font-size:13px;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid var(--neu-shadow-dark);">
-                            <th style="text-align:left; padding:12px; color:var(--text-muted);">Fecha</th>
-                            <th style="text-align:left; padding:12px; color:var(--text-muted);">Resumen</th>
-                            <th style="text-align:right; padding:12px; color:var(--text-muted);">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($stats['recent_responses'] as $response)
-                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-                            <td style="padding:12px; color:var(--text);">{{ $response['date'] }}</td>
-                            <td style="padding:12px; color:var(--text-muted);">{{ Str::limit($response['summary'], 40) }}</td>
-                            <td style="padding:12px; text-align:right;">
-                                <a href="#" style="color:var(--verde); font-weight:700; text-decoration:none;">VER</a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="3" style="padding:20px; text-align:center; color:var(--text-muted);">No hay respuestas recientes.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+
+            {{-- Date Range --}}
+            <div style="display:flex; align-items:center; gap:12px;">
+                <label style="font-weight:700; color:var(--text-muted); font-size:13px;">Desde:</label>
+                <input type="date" name="from_date" value="{{ request('from_date') }}" 
+                    style="background:var(--bg); border:none; padding:8px 12px; border-radius:10px; font-size:12px; color:var(--text-dark); box-shadow:var(--neu-in-sm); outline:none;">
+                
+                <label style="font-weight:700; color:var(--text-muted); font-size:13px;">Hasta:</label>
+                <input type="date" name="to_date" value="{{ request('to_date') }}" 
+                    style="background:var(--bg); border:none; padding:8px 12px; border-radius:10px; font-size:12px; color:var(--text-dark); box-shadow:var(--neu-in-sm); outline:none;">
+            </div>
+
+            <button type="submit" style="background:var(--uaemex); color:white; border:none; padding:10px 24px; border-radius:12px; font-weight:700; font-size:13px; cursor:pointer; box-shadow:4px 4px 10px rgba(45,80,22,0.3); display:flex; align-items:center; gap:6px;">
+                ▼ Aplicar
+            </button>
+        </form>
+    </div>
+
+    {{-- KPI CARDS --}}
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px; margin-bottom:30px;">
+        
+        {{-- Total Responses --}}
+        <div class="neu-card" style="padding:30px; display:flex; align-items:center; gap:24px;">
+            <div style="position:relative; width:80px; height:80px; display:flex; align-items:center; justify-content:center;">
+                <!-- Circular Progress Background -->
+                <svg width="80" height="80" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                    <circle cx="50" cy="50" r="40" stroke="var(--bg-dark)" stroke-width="12" fill="none" />
+                    <circle cx="50" cy="50" r="40" stroke="var(--uaemex)" stroke-width="12" fill="none" 
+                        stroke-dasharray="251.2" stroke-dashoffset="{{ 251.2 - (251.2 * 100 / 100) }}" stroke-linecap="round" />
+                </svg>
+                <div style="position:absolute; text-align:center;">
+                    <div style="font-weight:800; font-size:18px; color:var(--text-dark); line-height:1;">{{ $stats['total_responses'] }}</div>
+                    <div style="font-size:8px; font-weight:700; color:var(--text-muted);">RESP.</div>
+                </div>
+            </div>
+            <div>
+                <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin-bottom:4px;">Total de Respuestas</h3>
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Periodo seleccionado</div>
+                <div style="display:inline-flex; align-items:center; gap:4px; background:var(--verde-pale); padding:4px 10px; border-radius:20px; font-size:11px; font-weight:800; color:var(--uaemex);">
+                    <span>↑</span> {{ abs($stats['responses_growth']) }}% vs año anterior
+                </div>
             </div>
         </div>
+
+        {{-- Completion Rate --}}
+        <div class="neu-card" style="padding:30px; display:flex; align-items:center; gap:24px;">
+            <div style="position:relative; width:80px; height:80px; display:flex; align-items:center; justify-content:center;">
+                <!-- Circular Progress Background -->
+                <svg width="80" height="80" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                    <circle cx="50" cy="50" r="40" stroke="var(--bg-dark)" stroke-width="12" fill="none" />
+                    <circle cx="50" cy="50" r="40" stroke="var(--uaemex)" stroke-width="12" fill="none" 
+                        stroke-dasharray="251.2" stroke-dashoffset="{{ 251.2 - (251.2 * $stats['completion_rate'] / 100) }}" stroke-linecap="round" />
+                </svg>
+                <div style="position:absolute; text-align:center;">
+                    <div style="font-weight:800; font-size:18px; color:var(--text-dark); line-height:1;">{{ $stats['completion_rate'] }}%</div>
+                    <div style="font-size:8px; font-weight:700; color:var(--text-muted);">COMP.</div>
+                </div>
+            </div>
+            <div>
+                <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin-bottom:4px;">Tasa de Completado</h3>
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Encuestas finalizadas</div>
+                <div style="display:inline-flex; align-items:center; gap:4px; background:var(--bg-dark); padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; color:var(--text-muted);">
+                    - Sin variación
+                </div>
+            </div>
+        </div>
+
     </div>
-</div>
-@else
-<div style="text-align:center; padding:60px; color:var(--text-muted);">
-    <svg width="64" height="64" fill="none" stroke="var(--neu-shadow-dark)" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:16px;">
-        <path d="M12 20V10" />
-        <path d="M18 20V4" />
-        <path d="M6 20v-6" />
-    </svg>
-    <div style="font-size:18px; font-weight:700; color:var(--text-light);">Selecciona una encuesta para ver sus estadísticas</div>
-</div>
-@endif
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const stats = @json($stats ?? []);
+    {{-- BOTTOM GRID --}}
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:30px;">
+        
+        {{-- Chart Section --}}
+        <div class="neu-card" style="padding:24px; min-height:300px;">
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin-bottom:20px;">Distribución de Respuestas por Día</h3>
+            <div style="position:relative; height:220px; width:100%;">
+                <canvas id="responsesChart"></canvas>
+            </div>
+        </div>
 
-        if (!stats || Object.keys(stats).length === 0) return;
+        {{-- Top Surveys --}}
+        <div>
+            <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin-bottom:20px;">Top Encuestas</h3>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                @foreach($topSurveys as $index => $survey)
+                    <div class="neu-card" style="padding:16px; display:flex; align-items:center; gap:16px; margin-bottom:0;">
+                        <div style="font-family:'Sora',sans-serif; font-size:20px; font-weight:700; color:var(--oro);">
+                            {{ $loop->iteration }}
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; font-size:13px; color:var(--text-dark); margin-bottom:2px;">{{ $survey->title }}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">{{ $survey->responses_count }} respuestas</div>
+                        </div>
+                        <div style="font-weight:700; font-size:14px; color:var(--text-dark);">
+                            {{ $survey->responses_count }}
+                        </div>
+                    </div>
+                @endforeach
+                @if($topSurveys->isEmpty())
+                    <div style="text-align:center; padding:20px; color:var(--text-muted); font-style:italic; font-size:12px;">
+                        No hay datos disponibles
+                    </div>
+                @endif
+            </div>
+        </div>
 
-        Chart.defaults.font.family = "'Nunito', sans-serif";
-        Chart.defaults.color = '#6e7a70';
+    </div>
 
-        // Evolution Chart
-        const ctxEvolution = document.getElementById('evolutionChart');
-        if (ctxEvolution && stats.responses_evolution) {
-            new Chart(ctxEvolution, {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('responsesChart').getContext('2d');
+            
+            // Generate some random bubble/scatter data if empty, or use real data
+            const labels = @json($stats['responses_per_day']['labels']);
+            const data = @json($stats['responses_per_day']['data']);
+
+            // If data is empty (no responses), show dummy visualization for UI demo purposes? 
+            // Better to show real empty chart.
+            
+            new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: stats.responses_evolution.labels,
+                    labels: labels,
                     datasets: [{
                         label: 'Respuestas',
-                        data: stats.responses_evolution.data,
-                        borderColor: '#2d5016',
-                        backgroundColor: 'rgba(45, 80, 22, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#2d5016',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        data: data,
+                        backgroundColor: '#2D5016',
+                        borderColor: '#2D5016',
+                        borderWidth: 0,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: function(context) {
+                            // Alternating colors for bubbles style in the image
+                            const colors = ['#2D5016', '#C99A0A', '#3a6b1c', '#f5e6a3'];
+                            return colors[context.dataIndex % colors.length];
+                        },
+                        showLine: false // Scatter style as in image
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#2D5016',
+                            padding: 10,
+                            cornerRadius: 8,
+                            displayColors: false
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0,0,0,0.05)'
-                            }
+                            display: false, // Hide Y axis as in image
+                            beginAtZero: true
                         },
                         x: {
-                            grid: {
-                                display: false
-                            }
+                            grid: { display: false },
+                            border: { display: false },
+                            ticks: { display: false } // Hide X axis labels for cleaner look or keep them? Image shows no axis.
                         }
+                    },
+                    layout: {
+                        padding: 20
                     }
                 }
             });
-        }
+        });
+    </script>
 
-        // Distribution Chart
-        const ctxDistribution = document.getElementById('distributionChart');
-        if (ctxDistribution && stats.responses_distribution) {
-            new Chart(ctxDistribution, {
-                type: 'bar',
-                data: {
-                    labels: stats.responses_distribution.labels,
-                    datasets: [{
-                        label: 'Respuestas',
-                        data: stats.responses_distribution.data,
-                        backgroundColor: '#7a8f6a',
-                        borderRadius: 6,
-                        hoverBackgroundColor: '#2d5016'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0,0,0,0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
+    <style>
+        .btn-neu {
+            background: var(--bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--neu-out);
+            transition: all 0.2s;
+            cursor: pointer;
         }
-    });
-</script>
+        .btn-neu:active {
+            box-shadow: var(--neu-press);
+            transform: translateY(1px);
+        }
+    </style>
 @endsection

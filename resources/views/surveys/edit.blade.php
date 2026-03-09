@@ -3,11 +3,15 @@
 @section('title', 'Editar Encuesta')
 
 @section('content')
-<div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">Editar Encuesta</h2>
-    <a href="{{ route('surveys.index') }}" class="text-gray-500 hover:text-gray-700 text-xl">
-        <i class="fas fa-times"></i>
-    </a>
+<div class="ph">
+    <div class="ph-left">
+        <div class="ph-label">Administración</div>
+        <div class="ph-title">Editar Encuesta</div>
+        <div class="ph-sub">Actualiza el contenido y la configuración</div>
+    </div>
+    <div class="ph-actions">
+        <a href="{{ route('surveys.index') }}" class="btn btn-neu">Cancelar</a>
+    </div>
 </div>
 
 <form action="{{ route('surveys.update', $survey->id) }}" method="POST" id="surveyForm">

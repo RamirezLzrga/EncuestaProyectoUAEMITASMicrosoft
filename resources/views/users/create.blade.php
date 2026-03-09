@@ -4,20 +4,19 @@
 
 @section('content')
     <div class="max-w-2xl mx-auto">
-        <!-- Header -->
-        <div class="mb-6 flex items-center justify-between">
-            <div>
-                <h2 class="text-3xl font-bold text-gray-800">Nuevo Usuario</h2>
-                <p class="text-gray-500 mt-1">Completa el formulario para registrar un usuario</p>
+        <div class="ph">
+            <div class="ph-left">
+                <div class="ph-label">Administración</div>
+                <div class="ph-title">Nuevo Usuario</div>
+                <div class="ph-sub">Completa el formulario para registrar un usuario</div>
             </div>
-            <a href="{{ route('users.index') }}" class="text-gray-500 hover:text-gray-700 font-bold flex items-center gap-2">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
+            <div class="ph-actions">
+                <a href="{{ route('users.index') }}" class="btn btn-neu">← Volver</a>
+            </div>
         </div>
 
-        <!-- Form -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="h-2 bg-green-600 w-full"></div>
+        <div class="neu-card" style="padding:0; overflow:hidden;">
+            <div style="height:6px; background:var(--verde); width:100%;"></div>
             <form action="{{ route('users.store') }}" method="POST" class="p-8">
                 @csrf
 

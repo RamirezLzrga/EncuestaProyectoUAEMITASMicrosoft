@@ -3,21 +3,20 @@
 @section('title', 'Editar Usuario')
 
 @section('content')
-    <div class="dashboard-wrap">
-        <div class="max-w-2xl mx-auto">
-        <div class="dash-header">
-            <div>
-                <div class="dash-eyebrow">SIEI UAEMex</div>
-                <h2 class="dash-title">Editar Usuario</h2>
-                <p class="dash-subtitle">Modificar datos de {{ $user->name }}</p>
+    <div class="max-w-2xl mx-auto">
+        <div class="ph">
+            <div class="ph-left">
+                <div class="ph-label">Administración</div>
+                <div class="ph-title">Editar Usuario</div>
+                <div class="ph-sub">Modificar datos de {{ $user->name }}</div>
             </div>
-            <a href="{{ route('users.index') }}" class="text-gray-500 hover:text-gray-700 font-bold flex items-center gap-2">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
+            <div class="ph-actions">
+                <a href="{{ route('users.index') }}" class="btn btn-neu">← Volver</a>
+            </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="h-2 bg-yellow-500 w-full"></div>
+        <div class="neu-card" style="padding:0; overflow:hidden;">
+            <div style="height:6px; background:var(--oro); width:100%;"></div>
             <form action="{{ route('users.update', $user->id) }}" method="POST" class="p-8">
                 @csrf
                 @method('PUT')
@@ -92,6 +91,5 @@
                 </div>
             </form>
         </div>
-    </div>
     </div>
 @endsection

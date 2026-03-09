@@ -3,13 +3,15 @@
 @section('title', 'Configuración del Sistema')
 
 @section('content')
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-uaemex">Configuración del Sistema</h1>
-        <p class="text-sm text-gray-500">Ajustes generales, apariencia y seguridad del sistema.</p>
+    <div class="ph">
+        <div class="ph-left">
+            <div class="ph-label">Administración</div>
+            <div class="ph-title">Configuración del Sistema</div>
+            <div class="ph-sub">Ajustes generales, apariencia y seguridad del sistema</div>
+        </div>
     </div>
-</div>
 
-<div class="mt-6 bg-white rounded-xl shadow-sm">
+<div class="neu-card" style="padding:0; overflow:hidden;">
     <form method="POST" action="{{ route('admin.configuracion.update') }}">
         @csrf
     <div class="border-b border-gray-200 px-6 pt-4">

@@ -3,50 +3,43 @@
 @section('title', $survey->title)
 
 @section('content')
-    <div class="dashboard-wrap">
-        <div class="max-w-4xl mx-auto">
-        <div class="dash-header">
-            <div>
-                <div class="dash-eyebrow">SIEI UAEMex</div>
-                <h2 class="dash-title">{{ $survey->title }}</h2>
-                <p class="dash-subtitle">Detalle de la encuesta seleccionada</p>
+    <div class="max-w-4xl mx-auto">
+        <div class="ph">
+            <div class="ph-left">
+                <div class="ph-label">Administración</div>
+                <div class="ph-title">{{ $survey->title }}</div>
+                <div class="ph-sub">Detalle de la encuesta seleccionada</div>
             </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('surveys.index') }}" class="text-gray-500 hover:text-gray-700 font-bold flex items-center gap-2">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-                <a href="{{ route('surveys.public', $survey->id) }}" target="_blank" class="bg-purple-50 text-purple-600 px-4 py-2 rounded-lg font-bold hover:bg-purple-100 transition flex items-center gap-2">
-                    <i class="fas fa-external-link-alt"></i> Responder / Enlace Público
-                </a>
-                <a href="{{ route('surveys.edit', $survey->id) }}" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-100 transition">
-                    <i class="fas fa-edit mr-1"></i> Editar
-                </a>
+            <div class="ph-actions" style="flex-wrap:wrap;">
+                <a href="{{ route('surveys.index') }}" class="btn btn-neu">← Volver</a>
+                <a href="{{ route('surveys.public', $survey->id) }}" target="_blank" class="btn btn-oro">↗ Enlace público</a>
+                <a href="{{ route('surveys.edit', $survey->id) }}" class="btn btn-solid">✏ Editar</a>
             </div>
         </div>
 
         <!-- Survey Info -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-            <div class="h-3 bg-uaemex w-full"></div>
-            <div class="p-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $survey->title }}</h1>
-                <p class="text-gray-600 mb-6">{{ $survey->description }}</p>
+        <div class="neu-card" style="padding:0; overflow:hidden;">
+            <div style="height:6px; background:var(--verde); width:100%;"></div>
+            <div style="padding:28px;">
+                <h1 style="font-family:'Sora',sans-serif; font-weight:800; font-size:28px; color:var(--text-dark);">{{ $survey->title }}</h1>
+                <p style="color:var(--text-muted); margin-top:8px;">{{ $survey->description }}</p>
                 
-                <div class="flex flex-wrap gap-4 text-sm text-gray-500 border-t border-gray-100 pt-6">
-                    <div class="flex items-center gap-2">
-                        <i class="far fa-user text-uaemex"></i>
-                        <span>Autor: {{ $survey->user->name ?? 'Desconocido' }}</span>
+                <div style="display:flex; flex-wrap:wrap; gap:14px; margin-top:18px; padding-top:18px; border-top:1px solid rgba(0,0,0,.06); font-size:12.5px; color:var(--text-muted);">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-weight:800; color:var(--text);">Autor:</span>
+                        <span>{{ $survey->user->name ?? 'Desconocido' }}</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i class="far fa-calendar-alt text-uaemex"></i>
-                        <span>Creada: {{ $survey->created_at->format('d/m/Y h:i A') }}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-weight:800; color:var(--text);">Creada:</span>
+                        <span>{{ $survey->created_at->format('d/m/Y h:i A') }}</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i class="far fa-clock text-uaemex"></i>
-                        <span>Vigencia: {{ \Carbon\Carbon::parse($survey->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($survey->end_date)->format('d/m/Y') }}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-weight:800; color:var(--text);">Vigencia:</span>
+                        <span>{{ \Carbon\Carbon::parse($survey->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($survey->end_date)->format('d/m/Y') }}</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="{{ $survey->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} text-xs font-bold px-2 py-1 rounded-full">
-                            {{ $survey->is_active ? 'Activa' : 'Inactiva' }}
+                    <div>
+                        <span class="status-pill {{ $survey->is_active ? 'status-approved' : 'status-rejected' }}" style="background:var(--bg);">
+                            {{ $survey->is_active ? '● Activa' : '○ Inactiva' }}
                         </span>
                     </div>
                 </div>
@@ -55,7 +48,11 @@
 
         <!-- Questions -->
         <div class="space-y-6">
-            <h3 class="text-xl font-bold text-gray-800 ml-2">Preguntas ({{ count($survey->questions ?? []) }})</h3>
+            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-top:22px;">
+                <div style="font-family:'Sora',sans-serif; font-weight:800; font-size:16px; color:var(--text-dark);">
+                    Preguntas ({{ count($survey->questions ?? []) }})
+                </div>
+            </div>
             
             @php
                 $totalSections = 0;
@@ -71,7 +68,7 @@
                 @foreach($survey->questions as $index => $question)
                     @if(($question['type'] ?? null) === 'section')
                         @php $currentSection++; @endphp
-                        <div class="bg-[#e8f5fe] rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="neu-card" style="margin-bottom:0; background:var(--blue-pale); padding:18px;">
                             <div class="flex justify-between items-start mb-2">
                                 <div>
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-[#1967d2] bg-white">
@@ -89,7 +86,7 @@
                         @continue
                     @endif
 
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="neu-card" style="margin-bottom:0; padding:18px;">
                         <div class="flex justify-between items-start mb-4">
                             <h4 class="text-lg font-bold text-gray-800">
                                 {{ $index + 1 }}. {{ $question['text'] }}
@@ -170,11 +167,10 @@
                     </div>
                 @endforeach
             @else
-                <div class="text-center py-10 bg-white rounded-xl border border-dashed border-gray-300">
-                    <p class="text-gray-500">Esta encuesta no tiene preguntas configuradas.</p>
+                <div class="neu-card" style="margin-bottom:0; text-align:center; color:var(--text-muted);">
+                    Esta encuesta no tiene preguntas configuradas.
                 </div>
             @endif
         </div>
-    </div>
     </div>
 @endsection
