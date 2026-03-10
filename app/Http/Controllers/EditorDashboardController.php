@@ -40,7 +40,7 @@ class EditorDashboardController extends Controller
         $data = [];
         $surveysPerDay = [];
 
-        if (!empty($surveyIds)) {
+        if (! empty($surveyIds)) {
             $responses = SurveyResponse::with('survey:id,title')
                 ->whereIn('survey_id', $surveyIds)
                 ->whereBetween('created_at', [$startDate, $endDate])
@@ -51,7 +51,7 @@ class EditorDashboardController extends Controller
             foreach ($responses as $response) {
                 $dayKey = $response->created_at->copy()->startOfDay()->format('Y-m-d');
 
-                if (!isset($responseSummary[$dayKey])) {
+                if (! isset($responseSummary[$dayKey])) {
                     $responseSummary[$dayKey] = [
                         'total' => 0,
                         'surveys' => [],
@@ -63,7 +63,7 @@ class EditorDashboardController extends Controller
                 $surveyId = $response->survey_id;
                 $title = optional($response->survey)->title ?: 'Encuesta sin título';
 
-                if (!isset($responseSummary[$dayKey]['surveys'][$surveyId])) {
+                if (! isset($responseSummary[$dayKey]['surveys'][$surveyId])) {
                     $responseSummary[$dayKey]['surveys'][$surveyId] = [
                         'title' => $title,
                         'count' => 0,

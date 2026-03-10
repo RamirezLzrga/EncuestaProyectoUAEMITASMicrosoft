@@ -72,19 +72,19 @@ class ActivityLogController extends Controller
 
         $logs = $query->get();
 
-        $filename = "bitacora-" . date('Y-m-d-H-i-s') . ".csv";
+        $filename = 'bitacora-'.date('Y-m-d-H-i-s').'.csv';
 
         $headers = [
-            "Content-Type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=\"$filename\"",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
-        $callback = function() use ($logs) {
+        $callback = function () use ($logs) {
             $file = fopen('php://output', 'w');
-            
+
             // UTF-8 BOM para Excel
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
@@ -98,7 +98,7 @@ class ActivityLogController extends Controller
                     $log->action,
                     $log->description,
                     $log->type,
-                    $log->ip_address
+                    $log->ip_address,
                 ]);
             }
 

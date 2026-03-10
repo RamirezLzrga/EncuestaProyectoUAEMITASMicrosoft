@@ -1,20 +1,21 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\SurveyController;
-use App\Http\Controllers\StatisticsController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ActivityLogController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminApprovalController;
-use App\Http\Controllers\AdminTemplateController;
-use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminConfigController;
 use App\Http\Controllers\AdminMonitorController;
-use App\Http\Controllers\EditorSurveyController;
+use App\Http\Controllers\AdminReportController;
+use App\Http\Controllers\AdminTemplateController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditorDashboardController;
+use App\Http\Controllers\EditorSurveyController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\SurveyController;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\PreventBackHistory;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,7 +32,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', PreventBackHistory::class])->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
     Route::match(['get', 'post'], '/login/uaemex', [AuthController::class, 'loginUaemex'])->name('login.uaemex');
@@ -40,9 +41,11 @@ Route::middleware('guest')->group(function () {
 });
 
 // Route for UAEMex Callback (also acts as Editor Dashboard entry point)
-Route::match(['get', 'post'], '/editor/dashboard', [AuthController::class, 'uaemexCallback'])->name('editor.dashboard');
+Route::match(['get', 'post'], '/editor/dashboard', [AuthController::class, 'uaemexCallback'])
+    ->middleware(PreventBackHistory::class)
+    ->name('editor.dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', PreventBackHistory::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/perfil', [AuthController::class, 'profile'])->name('profile.show');
@@ -52,7 +55,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/surveys/{survey}/toggle-status', [SurveyController::class, 'toggleStatus'])->name('surveys.toggle-status');
     Route::post('/surveys/{survey}/duplicate', [SurveyController::class, 'duplicate'])->name('surveys.duplicate');
     Route::resource('surveys', SurveyController::class);
-    
+
     // Ruta de Estadísticas
     Route::get('/statistics', [StatisticsController::class, 'index'])->name('statistics.index');
 
@@ -72,32 +75,31 @@ Route::middleware('auth')->group(function () {
         Route::get('/encuestas/{survey}/compartir', [EditorSurveyController::class, 'compartir'])->name('encuestas.compartir');
     });
 
-    Route::middleware('auth')->group(function () {
-        Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
-        Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
-    });
+    Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
 
     // Rutas exclusivas para Administradores
     Route::middleware(['role:admin'])->group(function () {
         // Ruta de Bitácora
         Route::get('/activity-logs/export', [ActivityLogController::class, 'export'])->name('activity-logs.export');
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
-        
+
         // Rutas de Usuarios
+        Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
         Route::resource('users', UserController::class);
 
-            // Vistas de administración avanzadas
-            Route::get('/admin/aprobaciones', [AdminApprovalController::class, 'index'])->name('admin.aprobaciones');
-            Route::post('/admin/aprobaciones/{survey}', [AdminApprovalController::class, 'updateStatus'])->name('admin.aprobaciones.update');
-            Route::get('/admin/plantillas', [AdminTemplateController::class, 'index'])->name('admin.plantillas');
-            Route::post('/admin/plantillas', [AdminTemplateController::class, 'store'])->name('admin.plantillas.store');
-            Route::get('/admin/plantillas/{template}/edit', [AdminTemplateController::class, 'edit'])->name('admin.plantillas.edit');
-            Route::put('/admin/plantillas/{template}', [AdminTemplateController::class, 'update'])->name('admin.plantillas.update');
-            Route::delete('/admin/plantillas/{template}', [AdminTemplateController::class, 'destroy'])->name('admin.plantillas.destroy');
-            Route::get('/admin/reportes', [AdminReportController::class, 'index'])->name('admin.reportes');
-            Route::get('/admin/configuracion', [AdminConfigController::class, 'index'])->name('admin.configuracion');
-            Route::post('/admin/configuracion', [AdminConfigController::class, 'update'])->name('admin.configuracion.update');
-            Route::get('/admin/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
+        // Vistas de administración avanzadas
+        Route::get('/admin/aprobaciones', [AdminApprovalController::class, 'index'])->name('admin.aprobaciones');
+        Route::post('/admin/aprobaciones/{survey}', [AdminApprovalController::class, 'updateStatus'])->name('admin.aprobaciones.update');
+        Route::get('/admin/plantillas', [AdminTemplateController::class, 'index'])->name('admin.plantillas');
+        Route::post('/admin/plantillas', [AdminTemplateController::class, 'store'])->name('admin.plantillas.store');
+        Route::get('/admin/plantillas/{template}/edit', [AdminTemplateController::class, 'edit'])->name('admin.plantillas.edit');
+        Route::put('/admin/plantillas/{template}', [AdminTemplateController::class, 'update'])->name('admin.plantillas.update');
+        Route::delete('/admin/plantillas/{template}', [AdminTemplateController::class, 'destroy'])->name('admin.plantillas.destroy');
+        Route::get('/admin/reportes', [AdminReportController::class, 'index'])->name('admin.reportes');
+        Route::get('/admin/configuracion', [AdminConfigController::class, 'index'])->name('admin.configuracion');
+        Route::post('/admin/configuracion', [AdminConfigController::class, 'update'])->name('admin.configuracion.update');
+        Route::get('/admin/monitor', [AdminMonitorController::class, 'index'])->name('admin.monitor');
     });
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

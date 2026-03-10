@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use MongoDB\Laravel\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use MongoDB\Laravel\Eloquent\Model;
 
 class SurveyTemplate extends Model
 {
     use HasFactory;
 
     protected $connection = 'mongodb';
+
     protected $collection = 'survey_templates';
 
     protected $fillable = [
@@ -30,4 +31,3 @@ class SurveyTemplate extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 }
-

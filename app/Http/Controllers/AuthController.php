@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
-use App\Models\ActivityLog;
-
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Http\Controllers\EditorDashboardController;
 
 class AuthController extends Controller
 {
@@ -32,9 +31,9 @@ class AuthController extends Controller
 
         $accessToken = config('services.uaemex.token');
         $ldapApiUrl = config('services.uaemex.base_url');
-        
-        $url = $ldapApiUrl . '?access_token=' . $accessToken . '&correo=' . urlencode($request->email);
-        
+
+        $url = $ldapApiUrl.'?access_token='.$accessToken.'&correo='.urlencode($request->email);
+
         return redirect($url);
     }
 
@@ -45,18 +44,19 @@ class AuthController extends Controller
     public function uaemexCallback(Request $request)
     {
         // Si no hay datos, verificar si ya está logueado
-        if (!$request->has('data')) {
-            Log::info('UAEMex Callback: No data provided. Auth Check: ' . (Auth::check() ? 'true' : 'false'));
+        if (! $request->has('data')) {
+            Log::info('UAEMex Callback: No data provided. Auth Check: '.(Auth::check() ? 'true' : 'false'));
             if (Auth::check()) {
                 // Verificar permisos
                 $user = Auth::user();
-                Log::info('User role: ' . $user->role);
-                
+                Log::info('User role: '.$user->role);
+
                 if ($user->role === 'editor' || $user->role === 'admin') {
-                     return app(EditorDashboardController::class)->index();
+                    return app(EditorDashboardController::class)->index();
                 }
                 abort(403);
             }
+
             return redirect()->route('login');
         }
 
@@ -66,10 +66,11 @@ class AuthController extends Controller
 
             $data = base64_decode($request->data);
             $jsonData = json_decode($data, true);
-            
-            if (!isset($jsonData['error']) || $jsonData['error'] != 0) {
+
+            if (! isset($jsonData['error']) || $jsonData['error'] != 0) {
                 $mensaje = $jsonData['mensaje'] ?? 'Error desconocido en el servicio de autenticación.';
-                Log::error('UAEMex Auth Error: ' . $mensaje);
+                Log::error('UAEMex Auth Error: '.$mensaje);
+
                 return redirect()->route('login')->withErrors(['email' => $mensaje]);
             }
 
@@ -80,7 +81,15 @@ class AuthController extends Controller
             Log::info('UAEMex User Data', ['email' => $correo]);
 
             if (empty($correo)) {
-                 return redirect()->route('login')->withErrors(['email' => 'El servicio no devolvió un correo electrónico válido.']);
+                return redirect()->route('login')->withErrors(['email' => 'El servicio no devolvió un correo electrónico válido.']);
+            }
+
+            if (! str_ends_with(strtolower($correo), '@uaemex.mx')) {
+                $request->session()->forget('_old_input');
+
+                return redirect()
+                    ->route('login')
+                    ->withErrors(['email' => 'Debe acceder con un correo institucional válido (@uaemex.mx).']);
             }
 
             // Segunda verificación (Opcional pero recomendada)
@@ -89,7 +98,7 @@ class AuthController extends Controller
             $accessToken = config('services.uaemex.token');
             $validationUrl = config('services.uaemex.validation_url');
             $verifySsl = config('services.uaemex.verify_ssl', true);
-            
+
             // Log::info('Validating with token: ' . $accessToken);
 
             $response = Http::withOptions([
@@ -106,71 +115,78 @@ class AuthController extends Controller
 
                 if ($verificado == 1 && strcmp($correo, $correo_empleado) == 0) {
             */
-                    // LOGIN DIRECTO CON DATOS DEL CALLBACK
-                    // Buscar usuario en BD local
-                    // Nota: Usamos 'status' en lugar de 'activo' según el modelo User actual
-                    $user = User::where('email', $correo)->first();
+            // LOGIN DIRECTO CON DATOS DEL CALLBACK
+            // Buscar usuario en BD local
+            // Nota: Usamos 'status' en lugar de 'activo' según el modelo User actual
+            $user = User::where('email', $correo)->first();
 
-                    if ($user) {
-                        Log::info('User found in DB', ['id' => $user->id, 'status' => $user->status]);
+            if ($user) {
+                Log::info('User found in DB', ['id' => $user->id, 'status' => $user->status]);
 
-                        if ($user->status !== 'active' && $user->status !== true) { // Asumiendo que puede ser string o boolean
-                             Log::warning('User inactive');
-                             return redirect()->route('login')->withErrors(['email' => 'Su cuenta está inactiva.']);
-                        }
+                $isActive = ($user->status === 'active' || $user->status === true);
+                if (! $isActive) {
+                    Log::warning('User not active');
+                    $request->session()->forget('_old_input');
 
-                        // Login exitoso
-                        Auth::login($user);
-                        $request->session()->regenerate(); // Important for session security fixation
-                        
-                        // Log Activity
-                        ActivityLog::create([
-                            'user_id' => $user->id,
-                            'user_email' => $user->email,
-                            'action' => 'login_uaemex',
-                            'description' => 'Inicio de sesión exitoso vía UAEMex',
-                            'type' => 'auth',
-                            'ip_address' => $request->ip()
-                        ]);
+                    return redirect()
+                        ->route('login')
+                        ->withErrors(['email' => 'Tu cuenta fue verificada, pero está pendiente de aprobación del administrador.']);
+                }
 
-                        Log::info('Login successful, redirecting to dashboard');
+                // Login exitoso
+                Auth::login($user);
+                $request->session()->regenerate(); // Important for session security fixation
 
-                        // Redirigir al dashboard (limpiando la URL de parámetros)
-                        return redirect()->route('editor.dashboard');
+                // Log Activity
+                ActivityLog::create([
+                    'user_id' => $user->id,
+                    'user_email' => $user->email,
+                    'action' => 'login_uaemex',
+                    'description' => 'Inicio de sesión exitoso vía UAEMex',
+                    'type' => 'auth',
+                    'ip_address' => $request->ip(),
+                ]);
 
-                    } else {
-                        Log::warning('User not found in DB, creating new user');
-                        
-                        // Crear usuario automáticamente
-                        try {
-                            $newUser = User::create([
-                                'name' => $empleado['nombre_completo'] ?? $empleado['nombre'] . ' ' . $empleado['paterno'],
-                                'email' => $correo,
-                                'password' => Hash::make(\Illuminate\Support\Str::random(16)), // Contraseña aleatoria segura
-                                'role' => 'editor', // Rol por defecto
-                                'status' => 'active',
-                            ]);
+                Log::info('Login successful, redirecting to dashboard');
 
-                            Log::info('New user created', ['id' => $newUser->id]);
+                // Redirigir al dashboard (limpiando la URL de parámetros)
+                return redirect()->route('editor.dashboard');
 
-                            Auth::login($newUser);
-                            $request->session()->regenerate();
+            } else {
+                Log::warning('User not found in DB, creating new user');
 
-                            ActivityLog::create([
-                                'user_id' => $newUser->id,
-                                'user_email' => $newUser->email,
-                                'action' => 'register_uaemex',
-                                'description' => 'Registro automático vía UAEMex',
-                                'type' => 'auth',
-                                'ip_address' => $request->ip()
-                            ]);
+                // Crear usuario automáticamente
+                try {
+                    $newUser = User::create([
+                        'name' => $empleado['nombre_completo'] ?? $empleado['nombre'].' '.$empleado['paterno'],
+                        'email' => $correo,
+                        'password' => Hash::make(\Illuminate\Support\Str::random(16)), // Contraseña aleatoria segura
+                        'role' => 'editor', // Rol por defecto
+                        'status' => 'inactive',
+                    ]);
 
-                            return redirect()->route('editor.dashboard');
-                        } catch (\Exception $e) {
-                            Log::error('Error creating user: ' . $e->getMessage());
-                            return redirect()->route('login')->withErrors(['email' => 'Error al crear su cuenta de usuario.']);
-                        }
-                    }
+                    Log::info('New user created', ['id' => $newUser->id]);
+
+                    ActivityLog::create([
+                        'user_id' => $newUser->id,
+                        'user_email' => $newUser->email,
+                        'action' => 'register_uaemex',
+                        'description' => 'Registro automático vía UAEMex',
+                        'type' => 'auth',
+                        'ip_address' => $request->ip(),
+                    ]);
+
+                    $request->session()->forget('_old_input');
+
+                    return redirect()
+                        ->route('login')
+                        ->withErrors(['email' => 'Tu cuenta fue creada correctamente y está pendiente de aprobación del administrador.']);
+                } catch (\Exception $e) {
+                    Log::error('Error creating user: '.$e->getMessage());
+
+                    return redirect()->route('login')->withErrors(['email' => 'Error al crear su cuenta de usuario.']);
+                }
+            }
             /*
                 } else {
                     Log::error('UAEMex Verification Failed', ['response' => $datos]);
@@ -183,7 +199,8 @@ class AuthController extends Controller
             */
 
         } catch (\Exception $e) {
-            Log::error('Error en login UAEMex: ' . $e->getMessage());
+            Log::error('Error en login UAEMex: '.$e->getMessage());
+
             return redirect()->route('login')->withErrors(['email' => 'Ocurrió un error al procesar el inicio de sesión.']);
         }
     }
@@ -196,6 +213,20 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            if ($user && $user->status !== null) {
+                $isActive = ($user->status === 'active' || $user->status === true);
+                if (! $isActive) {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    $request->session()->forget('_old_input');
+
+                    return back()
+                        ->withErrors(['email' => 'Tu cuenta está pendiente de aprobación del administrador.']);
+                }
+            }
+
             $request->session()->regenerate();
 
             // Log Activity
@@ -205,10 +236,8 @@ class AuthController extends Controller
                 'action' => 'login',
                 'description' => 'Inicio de sesión exitoso',
                 'type' => 'auth',
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
-
-            $user = Auth::user();
 
             $target = $user && $user->role === 'admin'
                 ? route('dashboard')
@@ -217,9 +246,11 @@ class AuthController extends Controller
             return redirect()->intended($target);
         }
 
+        $request->session()->forget('_old_input');
+
         return back()->withErrors([
             'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
-        ])->onlyInput('email');
+        ]);
     }
 
     public function showRegistrationForm()
@@ -250,7 +281,7 @@ class AuthController extends Controller
             'action' => 'register',
             'description' => 'Nuevo usuario registrado',
             'type' => 'user',
-            'ip_address' => $request->ip()
+            'ip_address' => $request->ip(),
         ]);
 
         $target = $user && $user->role === 'admin'
@@ -263,6 +294,7 @@ class AuthController extends Controller
     public function profile()
     {
         $user = Auth::user();
+
         return view('auth.profile', compact('user'));
     }
 
@@ -278,7 +310,7 @@ class AuthController extends Controller
 
         $user->name = $validated['name'];
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
 
@@ -294,7 +326,7 @@ class AuthController extends Controller
             'action' => 'update_profile',
             'description' => 'Actualizó su perfil',
             'type' => 'user',
-            'ip_address' => $request->ip()
+            'ip_address' => $request->ip(),
         ]);
 
         return redirect()->route('profile.show')->with('success', 'Perfil actualizado correctamente.');
@@ -310,7 +342,7 @@ class AuthController extends Controller
                 'action' => 'logout',
                 'description' => 'Cierre de sesión',
                 'type' => 'auth',
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
         }
 
@@ -320,6 +352,14 @@ class AuthController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')
+            ->withHeaders([
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, private',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
+                'Clear-Site-Data' => '"cache", "cookies", "storage"',
+            ])
+            ->withCookie(Cookie::forget(config('session.cookie')))
+            ->withCookie(Cookie::forget('XSRF-TOKEN'));
     }
 }

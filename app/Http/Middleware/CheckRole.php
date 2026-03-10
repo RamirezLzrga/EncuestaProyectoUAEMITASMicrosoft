@@ -15,7 +15,7 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!$request->user() || !in_array($request->user()->role, $roles)) {
+        if (! $request->user() || ! in_array($request->user()->role, $roles)) {
             // Si el usuario es admin, siempre permitir (opcional, pero buena práctica si admin es superusuario)
             if ($request->user() && $request->user()->role === 'admin') {
                 return $next($request);

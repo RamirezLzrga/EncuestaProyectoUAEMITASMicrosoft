@@ -83,6 +83,18 @@
 
                 <div style="display:flex; gap:8px; width:100%; margin-top:6px;">
                     <a href="{{ route('users.edit', $u->id) }}" class="btn btn-neu btn-sm" style="flex:1; justify-content:center;">✏ Editar</a>
+                    @php
+                        $toggleUrl = \Illuminate\Support\Facades\Route::has('users.toggle-status')
+                            ? route('users.toggle-status', $u->id)
+                            : url('/users/' . $u->id . '/toggle-status');
+                    @endphp
+                    <form action="{{ $toggleUrl }}" method="POST" style="flex:1;" onsubmit="return confirm('{{ $u->status==='active' ? '¿Inactivar usuario?' : '¿Activar usuario?' }}');">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn {{ $u->status==='active' ? 'btn-danger' : 'btn-oro' }} btn-sm" style="width:100%; justify-content:center;">
+                            {{ $u->status==='active' ? 'Inactivar' : 'Activar' }}
+                        </button>
+                    </form>
                     <form action="{{ route('users.destroy', $u->id) }}" method="POST" onsubmit="return confirm('¿Eliminar usuario?');">
                         @csrf
                         @method('DELETE')

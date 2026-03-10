@@ -318,6 +318,13 @@
             @yield('content')
         </section>
     </div>
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            if (event && event.persisted) {
+                window.location.reload();
+            }
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

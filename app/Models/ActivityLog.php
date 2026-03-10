@@ -7,6 +7,7 @@ use MongoDB\Laravel\Eloquent\Model;
 class ActivityLog extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'activity_logs';
 
     protected $fillable = [
@@ -16,12 +17,12 @@ class ActivityLog extends Model
         'description',
         'type', // 'auth', 'survey', 'user'
         'ip_address',
-        'details' // json/array con info extra
+        'details', // json/array con info extra
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'details' => 'array'
+        'details' => 'array',
     ];
 
     public function user()

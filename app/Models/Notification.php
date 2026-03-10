@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
-use App\Models\Survey;
-use App\Models\User;
 
 class Notification extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'notifications';
 
     protected $fillable = [
@@ -95,7 +94,7 @@ class Notification extends Model
                     'user_id' => $owner->id,
                     'role' => $owner->role,
                     'title' => 'Encuesta próxima a vencer',
-                    'message' => 'Tu encuesta "' . $survey->title . '" vence el ' . $survey->end_date->format('d/m/Y') . '.',
+                    'message' => 'Tu encuesta "'.$survey->title.'" vence el '.$survey->end_date->format('d/m/Y').'.',
                     'type' => 'survey_expiring',
                     'data' => [
                         'survey_id' => (string) $survey->id,
@@ -110,7 +109,7 @@ class Notification extends Model
                     'user_id' => $admin->id,
                     'role' => 'admin',
                     'title' => 'Encuesta próxima a vencer',
-                    'message' => 'La encuesta "' . $survey->title . '" vence el ' . $survey->end_date->format('d/m/Y') . '.',
+                    'message' => 'La encuesta "'.$survey->title.'" vence el '.$survey->end_date->format('d/m/Y').'.',
                     'type' => 'survey_expiring_admin',
                     'data' => [
                         'survey_id' => (string) $survey->id,

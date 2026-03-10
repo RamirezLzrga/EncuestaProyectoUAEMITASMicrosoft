@@ -513,7 +513,7 @@
     </div>
 
     <div class="card-body">
-      <form action="{{ route('login') }}" method="POST">
+      <form action="{{ route('login') }}" method="POST" autocomplete="off">
         @csrf
 
         <div>
@@ -526,7 +526,7 @@
               required
               class="field-input"
               placeholder="correo@uaemex.mx"
-              value="{{ old('email') }}"
+              autocomplete="off"
             >
             <span class="input-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -553,6 +553,7 @@
               required
               class="field-input"
               placeholder="••••••••"
+              autocomplete="off"
             >
             <span class="input-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -602,6 +603,25 @@
           if (!msForm || !msEmail || !emailInput) return;
           msForm.addEventListener('submit', function () {
             msEmail.value = emailInput.value || '';
+          });
+        })();
+      </script>
+
+      <script>
+        (function () {
+          function clearAuthFields() {
+            var emailInput = document.getElementById('email');
+            var passwordInput = document.getElementById('password');
+            var msEmail = document.getElementById('microsoft-email');
+
+            if (emailInput) emailInput.value = '';
+            if (passwordInput) passwordInput.value = '';
+            if (msEmail) msEmail.value = '';
+          }
+
+          document.addEventListener('DOMContentLoaded', clearAuthFields);
+          window.addEventListener('pageshow', function () {
+            clearAuthFields();
           });
         })();
       </script>

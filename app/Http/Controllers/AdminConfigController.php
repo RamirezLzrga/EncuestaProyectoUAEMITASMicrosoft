@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\SystemConfig;
 use App\Models\ActivityLog;
+use App\Models\SystemConfig;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AdminConfigController extends Controller
@@ -51,7 +51,7 @@ class AdminConfigController extends Controller
             'security.password_expiration_days' => 'nullable|integer|min:1',
         ]);
 
-        $config = SystemConfig::first() ?: new SystemConfig();
+        $config = SystemConfig::first() ?: new SystemConfig;
 
         $general = $request->input('general', []);
         $security = $request->input('security', []);

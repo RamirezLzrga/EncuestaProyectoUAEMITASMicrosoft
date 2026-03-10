@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
+use App\Models\Notification;
 use App\Models\Survey;
 use App\Models\SurveyResponse;
-use App\Models\ActivityLog;
 use App\Models\User;
-use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,7 +31,7 @@ class SurveyController extends Controller
             ->toArray();
 
         // Filtro por Fecha de Inicio (Desde)
-        if ($request->has('start_date') && !empty($request->start_date)) {
+        if ($request->has('start_date') && ! empty($request->start_date)) {
             $query->where('start_date', '>=', $request->start_date);
         }
 
@@ -41,7 +41,7 @@ class SurveyController extends Controller
         }
 
         if ($request->has('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
+            $query->where('title', 'like', '%'.$request->search.'%');
         }
 
         $surveys = $query->orderBy('created_at', 'desc')->paginate(10);
@@ -106,7 +106,7 @@ class SurveyController extends Controller
 
         $booleanKeys = ['anonymous', 'collect_names', 'collect_emails', 'allow_multiple', 'one_response_per_ip'];
         foreach ($booleanKeys as $key) {
-            $mergedSettings[$key] = !empty($mergedSettings[$key]);
+            $mergedSettings[$key] = ! empty($mergedSettings[$key]);
         }
 
         if (isset($mergedSettings['max_responses']) && $mergedSettings['max_responses'] !== null && $mergedSettings['max_responses'] !== '') {
@@ -131,10 +131,10 @@ class SurveyController extends Controller
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'create',
-            'description' => 'Creó nueva encuesta: ' . $survey->title,
+            'description' => 'Creó nueva encuesta: '.$survey->title,
             'type' => 'survey',
             'ip_address' => $request->ip(),
-            'details' => ['survey_id' => $survey->id]
+            'details' => ['survey_id' => $survey->id],
         ]);
 
         $admins = User::where('role', 'admin')->get();
@@ -143,7 +143,7 @@ class SurveyController extends Controller
                 'user_id' => $admin->id,
                 'role' => 'admin',
                 'title' => 'Nueva encuesta creada',
-                'message' => Auth::user()->name . ' creó la encuesta "' . $survey->title . '"',
+                'message' => Auth::user()->name.' creó la encuesta "'.$survey->title.'"',
                 'type' => 'survey_created',
                 'data' => [
                     'survey_id' => (string) $survey->id,
@@ -215,7 +215,7 @@ class SurveyController extends Controller
 
         $booleanKeys = ['anonymous', 'collect_names', 'collect_emails', 'allow_multiple', 'one_response_per_ip'];
         foreach ($booleanKeys as $key) {
-            $mergedSettings[$key] = !empty($mergedSettings[$key]);
+            $mergedSettings[$key] = ! empty($mergedSettings[$key]);
         }
 
         if (isset($mergedSettings['max_responses']) && $mergedSettings['max_responses'] !== null && $mergedSettings['max_responses'] !== '') {
@@ -240,10 +240,10 @@ class SurveyController extends Controller
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'update',
-            'description' => 'Actualizó encuesta: ' . $survey->title,
+            'description' => 'Actualizó encuesta: '.$survey->title,
             'type' => 'survey',
             'ip_address' => $request->ip(),
-            'details' => ['survey_id' => $survey->id]
+            'details' => ['survey_id' => $survey->id],
         ]);
 
         $admins = User::where('role', 'admin')->get();
@@ -252,7 +252,7 @@ class SurveyController extends Controller
                 'user_id' => $admin->id,
                 'role' => 'admin',
                 'title' => 'Encuesta actualizada',
-                'message' => Auth::user()->name . ' actualizó la encuesta "' . $survey->title . '"',
+                'message' => Auth::user()->name.' actualizó la encuesta "'.$survey->title.'"',
                 'type' => 'survey_updated',
                 'data' => [
                     'survey_id' => (string) $survey->id,
@@ -269,11 +269,11 @@ class SurveyController extends Controller
      */
     public function toggleStatus(Request $request, Survey $survey)
     {
-        if (!Auth::user() || Auth::user()->role !== 'admin') {
+        if (! Auth::user() || Auth::user()->role !== 'admin') {
             abort(403, 'Solo los administradores pueden cambiar el estado de las encuestas.');
         }
 
-        $survey->is_active = !$survey->is_active;
+        $survey->is_active = ! $survey->is_active;
         $survey->save();
 
         $status = $survey->is_active ? 'habilitada' : 'inhabilitada';
@@ -285,16 +285,16 @@ class SurveyController extends Controller
             'description' => "Cambió estado de encuesta '{$survey->title}' a {$status}",
             'type' => 'survey',
             'ip_address' => $request->ip(),
-            'details' => ['survey_id' => $survey->id, 'new_status' => $status]
+            'details' => ['survey_id' => $survey->id, 'new_status' => $status],
         ]);
 
-        return back()->with('success', "Encuesta {$status} correctamente.");    
+        return back()->with('success', "Encuesta {$status} correctamente.");
     }
 
     public function duplicate(Request $request, Survey $survey)
     {
         $copy = $survey->replicate();
-        $copy->title = $survey->title . ' (copia)';
+        $copy->title = $survey->title.' (copia)';
         $copy->approval_status = 'pending';
         $copy->approval_comment = null;
         $copy->approved_by = null;
@@ -308,7 +308,7 @@ class SurveyController extends Controller
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'duplicate',
-            'description' => 'Duplicó encuesta: ' . $survey->title . ' → ' . $copy->title,
+            'description' => 'Duplicó encuesta: '.$survey->title.' → '.$copy->title,
             'type' => 'survey',
             'ip_address' => $request->ip(),
             'details' => [
@@ -334,10 +334,10 @@ class SurveyController extends Controller
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'delete',
-            'description' => 'Eliminó encuesta: ' . $title,
+            'description' => 'Eliminó encuesta: '.$title,
             'type' => 'survey',
             'ip_address' => $request->ip(),
-            'details' => ['survey_id' => $id]
+            'details' => ['survey_id' => $id],
         ]);
 
         return redirect()->route('surveys.index')->with('success', 'Encuesta eliminada.');
@@ -348,8 +348,8 @@ class SurveyController extends Controller
     public function showPublic($id)
     {
         $survey = Survey::findOrFail($id);
-        
-        if (!$survey->is_active) {
+
+        if (! $survey->is_active) {
             return view('surveys.inactive');
         }
 
@@ -360,7 +360,7 @@ class SurveyController extends Controller
             return view('surveys.inactive', ['message' => 'Esta encuesta está fuera del periodo de vigencia.']);
         }
 
-        if (!empty($settings['max_responses'])) {
+        if (! empty($settings['max_responses'])) {
             $currentCount = $survey->responses()->count();
             if ($currentCount >= (int) $settings['max_responses']) {
                 return view('surveys.inactive', ['message' => 'Esta encuesta ya alcanzó el límite máximo de respuestas.']);
@@ -377,18 +377,18 @@ class SurveyController extends Controller
         $settings = $survey->settings ?? [];
 
         $now = now();
-        if (!$survey->is_active || $now < $survey->start_date || $now > $survey->end_date) {
+        if (! $survey->is_active || $now < $survey->start_date || $now > $survey->end_date) {
             return view('surveys.inactive', ['message' => 'Esta encuesta no está disponible en este momento.']);
         }
 
-        if (!empty($settings['max_responses'])) {
+        if (! empty($settings['max_responses'])) {
             $currentCount = $survey->responses()->count();
             if ($currentCount >= (int) $settings['max_responses']) {
                 return view('surveys.inactive', ['message' => 'Esta encuesta ya alcanzó el límite máximo de respuestas.']);
             }
         }
 
-        if (!empty($settings['one_response_per_ip'])) {
+        if (! empty($settings['one_response_per_ip'])) {
             $alreadyAnswered = $survey->responses()
                 ->where('ip_address', $request->ip())
                 ->exists();
@@ -401,21 +401,21 @@ class SurveyController extends Controller
         // Validación básica (se podría extender según questions required)
         // Por simplicidad en este MVP, validamos que lleguen 'answers'
         $request->validate([
-            'answers' => 'required|array'
+            'answers' => 'required|array',
         ]);
 
         // Aquí se podría añadir validación detallada iterando sobre $survey->questions
         // y comprobando si las 'required' están presentes en $request->answers
 
-        $response = new SurveyResponse();
+        $response = new SurveyResponse;
         $response->survey_id = $survey->id;
         $response->answers = $request->input('answers');
         $response->ip_address = $request->ip();
         $response->user_agent = $request->userAgent();
-        
+
         // Si no es anónima y el usuario está logueado (opcional)
         // O si se piden nombres/emails en settings, se podrían guardar aparte
-        
+
         $response->save();
 
         $owner = $survey->user_id ? User::find($survey->user_id) : null;
@@ -424,7 +424,7 @@ class SurveyController extends Controller
                 'user_id' => $owner->id,
                 'role' => $owner->role,
                 'title' => 'Nueva respuesta recibida',
-                'message' => 'La encuesta "' . $survey->title . '" recibió una nueva respuesta.',
+                'message' => 'La encuesta "'.$survey->title.'" recibió una nueva respuesta.',
                 'type' => 'response_received',
                 'data' => [
                     'survey_id' => (string) $survey->id,
@@ -439,7 +439,7 @@ class SurveyController extends Controller
                 'user_id' => $admin->id,
                 'role' => 'admin',
                 'title' => 'Nueva respuesta en encuesta',
-                'message' => 'La encuesta "' . $survey->title . '" recibió una nueva respuesta.',
+                'message' => 'La encuesta "'.$survey->title.'" recibió una nueva respuesta.',
                 'type' => 'response_received_admin',
                 'data' => [
                     'survey_id' => (string) $survey->id,
@@ -454,6 +454,7 @@ class SurveyController extends Controller
     public function thankYou($id)
     {
         $survey = Survey::findOrFail($id);
+
         return view('surveys.thank-you', compact('survey'));
     }
 }

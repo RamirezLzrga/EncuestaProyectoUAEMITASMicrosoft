@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
@@ -12,7 +11,7 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'count' => 0,
                 'items' => [],
@@ -20,12 +19,12 @@ class NotificationController extends Controller
         }
 
         $notifications = Notification::where(function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                    ->orWhere(function ($q) use ($user) {
-                        $q->whereNull('user_id')
-                            ->where('role', $user->role);
-                    });
-            })
+            $query->where('user_id', $user->id)
+                ->orWhere(function ($q) use ($user) {
+                    $q->whereNull('user_id')
+                        ->where('role', $user->role);
+                });
+        })
             ->whereNull('read_at')
             ->orderBy('created_at', 'desc')
             ->limit(10)
@@ -52,12 +51,12 @@ class NotificationController extends Controller
 
         if ($user) {
             Notification::where(function ($query) use ($user) {
-                    $query->where('user_id', $user->id)
-                        ->orWhere(function ($q) use ($user) {
-                            $q->whereNull('user_id')
-                                ->where('role', $user->role);
-                        });
-                })
+                $query->where('user_id', $user->id)
+                    ->orWhere(function ($q) use ($user) {
+                        $q->whereNull('user_id')
+                            ->where('role', $user->role);
+                    });
+            })
                 ->whereNull('read_at')
                 ->update(['read_at' => now()]);
         }

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SurveyTemplate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\SurveyTemplate;
 
 class AdminTemplateController extends Controller
 {
-    public function index(SurveyTemplate $editingTemplate = null)
+    public function index(?SurveyTemplate $editingTemplate = null)
     {
         $categories = [
             'Satisfacción',
@@ -33,7 +33,7 @@ class AdminTemplateController extends Controller
             'is_mandatory' => 'nullable|boolean',
         ]);
 
-        $template = new SurveyTemplate();
+        $template = new SurveyTemplate;
         $template->name = $data['name'];
         $template->category = $data['category'];
         $template->is_mandatory = $request->boolean('is_mandatory');

@@ -7,6 +7,7 @@ use MongoDB\Laravel\Eloquent\Model;
 class SystemConfig extends Model
 {
     protected $connection = 'mongodb';
+
     protected $collection = 'system_config';
 
     protected $fillable = [
@@ -23,4 +24,3 @@ class SystemConfig extends Model
         'limits' => 'array',
     ];
 }
-

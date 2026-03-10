@@ -632,6 +632,13 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   setInterval(checkNotifications, 5000);
   checkNotifications(); // Initial check
 </script>
+<script>
+  window.addEventListener('pageshow', function (event) {
+    if (event && event.persisted) {
+      window.location.reload();
+    }
+  });
+</script>
 @stack('scripts')
 </body>
 </html>

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
+use App\Models\Notification;
 use App\Models\Survey;
 use App\Models\SurveyResponse;
 use App\Models\User;
-use App\Models\Notification;
-use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -67,13 +67,13 @@ class EditorSurveyController extends Controller
 
     public function builderStore(Request $request)
     {
-        $survey = $this->saveSurveyFromBuilder($request, new Survey());
+        $survey = $this->saveSurveyFromBuilder($request, new Survey);
 
         ActivityLog::create([
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'create',
-            'description' => 'Editor creó encuesta: ' . $survey->title,
+            'description' => 'Editor creó encuesta: '.$survey->title,
             'type' => 'survey',
             'ip_address' => $request->ip(),
             'details' => [
@@ -88,7 +88,7 @@ class EditorSurveyController extends Controller
                 'user_id' => $admin->id,
                 'role' => 'admin',
                 'title' => 'Nueva encuesta creada en editor',
-                'message' => Auth::user()->name . ' creó la encuesta "' . $survey->title . '" desde el editor.',
+                'message' => Auth::user()->name.' creó la encuesta "'.$survey->title.'" desde el editor.',
                 'type' => 'editor_survey_created',
                 'data' => [
                     'survey_id' => (string) $survey->id,
@@ -112,7 +112,7 @@ class EditorSurveyController extends Controller
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'update',
-            'description' => 'Editor actualizó encuesta: ' . $survey->title,
+            'description' => 'Editor actualizó encuesta: '.$survey->title,
             'type' => 'survey',
             'ip_address' => $request->ip(),
             'details' => [
@@ -127,7 +127,7 @@ class EditorSurveyController extends Controller
                 'user_id' => $admin->id,
                 'role' => 'admin',
                 'title' => 'Encuesta modificada en editor',
-                'message' => Auth::user()->name . ' modificó la encuesta "' . $survey->title . '" desde el editor.',
+                'message' => Auth::user()->name.' modificó la encuesta "'.$survey->title.'" desde el editor.',
                 'type' => 'editor_survey_updated',
                 'data' => [
                     'survey_id' => (string) $survey->id,
@@ -177,7 +177,7 @@ class EditorSurveyController extends Controller
         }
 
         $survey->fill($validated);
-        if (!$survey->exists) {
+        if (! $survey->exists) {
             $survey->user_id = Auth::id();
         }
         $survey->is_active = false;
@@ -379,7 +379,7 @@ class EditorSurveyController extends Controller
                 'user_id' => $admin->id,
                 'role' => 'admin',
                 'title' => 'Configuración de encuesta actualizada',
-                'message' => Auth::user()->name . ' actualizó la configuración de "' . $survey->title . '".',
+                'message' => Auth::user()->name.' actualizó la configuración de "'.$survey->title.'".',
                 'type' => 'editor_survey_config_updated',
                 'data' => [
                     'survey_id' => (string) $survey->id,

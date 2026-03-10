@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\ActivityLog;
-use App\Models\User;
 use Carbon\Carbon;
 
 class AdminMonitorController extends Controller

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\ActivityLog;
 use App\Models\Survey;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -19,10 +19,10 @@ class UserController extends Controller
         $query = User::query();
 
         // Filtros
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
+        if ($request->has('search') && ! empty($request->search)) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('email', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -73,10 +73,10 @@ class UserController extends Controller
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'create',
-            'description' => 'Creó usuario: ' . $user->name,
+            'description' => 'Creó usuario: '.$user->name,
             'type' => 'user',
             'ip_address' => $request->ip(),
-            'details' => ['user_id' => $user->id]
+            'details' => ['user_id' => $user->id],
         ]);
 
         return redirect()->route('users.index')->with('success', 'Usuario creado exitosamente.');
@@ -88,6 +88,7 @@ class UserController extends Controller
     public function edit(string $id)
     {
         $user = User::findOrFail($id);
+
         return view('users.edit', compact('user'));
     }
 
@@ -100,7 +101,7 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|string|in:admin,editor',
             'status' => 'required|string|in:active,inactive',
@@ -113,7 +114,7 @@ class UserController extends Controller
             'status' => $validated['status'],
         ];
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $data['password'] = Hash::make($validated['password']);
         }
 
@@ -124,10 +125,10 @@ class UserController extends Controller
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'update',
-            'description' => 'Actualizó usuario: ' . $user->name,
+            'description' => 'Actualizó usuario: '.$user->name,
             'type' => 'user',
             'ip_address' => $request->ip(),
-            'details' => ['user_id' => $user->id]
+            'details' => ['user_id' => $user->id],
         ]);
 
         return redirect()->route('users.index')->with('success', 'Usuario actualizado exitosamente.');
@@ -139,7 +140,7 @@ class UserController extends Controller
     public function destroy(Request $request, string $id)
     {
         $user = User::findOrFail($id);
-        
+
         // Prevent deleting self
         if ($user->id === Auth::id()) {
             return redirect()->route('users.index')->with('error', 'No puedes eliminar tu propio usuario.');
@@ -160,12 +161,37 @@ class UserController extends Controller
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'delete',
-            'description' => 'Eliminó usuario: ' . $userName . ($adminFallback ? ' (encuestas transferidas a ' . $adminFallback->name . ')' : ''),
+            'description' => 'Eliminó usuario: '.$userName.($adminFallback ? ' (encuestas transferidas a '.$adminFallback->name.')' : ''),
             'type' => 'user',
             'ip_address' => $request->ip(),
-            'details' => ['user_id' => $id]
+            'details' => ['user_id' => $id],
         ]);
 
         return redirect()->route('users.index')->with('success', 'Usuario eliminado exitosamente.');
+    }
+
+    public function toggleStatus(Request $request, string $id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->id === Auth::id()) {
+            return redirect()->route('users.index')->with('error', 'No puedes cambiar el estado de tu propio usuario.');
+        }
+
+        $newStatus = $user->status === 'active' ? 'inactive' : 'active';
+        $user->status = $newStatus;
+        $user->save();
+
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'user_email' => Auth::user()->email,
+            'action' => 'toggle_status',
+            'description' => 'Cambió estado de usuario: '.$user->name.' a '.($newStatus === 'active' ? 'activo' : 'inactivo'),
+            'type' => 'user',
+            'ip_address' => $request->ip(),
+            'details' => ['user_id' => $user->id, 'new_status' => $newStatus],
+        ]);
+
+        return redirect()->route('users.index')->with('success', 'Estado de usuario actualizado.');
     }
 }
