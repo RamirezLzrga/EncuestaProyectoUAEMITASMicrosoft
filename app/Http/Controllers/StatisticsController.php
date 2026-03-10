@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Survey;
-use App\Models\SurveyResponse;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class StatisticsController extends Controller
 {
@@ -44,7 +43,8 @@ class StatisticsController extends Controller
             'completion_growth' => 0,
             'responses_per_day' => ['labels' => [], 'data' => []],
             'responses_distribution' => ['labels' => [], 'data' => []],
-            'recent_responses' => []
+            'response_status' => ['labels' => ['Completadas', 'En progreso', 'Abandonadas'], 'data' => [0, 0, 0]],
+            'recent_responses' => [],
         ];
 
         if ($selectedSurvey) {
@@ -61,7 +61,46 @@ class StatisticsController extends Controller
             $totalResponses = $totalQuery->count();
             $stats['total_responses'] = $totalResponses;
 
-            $stats['completion_rate'] = $totalResponses > 0 ? 100 : 0; 
+            $stats['completion_rate'] = $totalResponses > 0 ? 100 : 0;
+
+            $questions = $selectedSurvey->questions ?? [];
+            $questionCount = is_array($questions) ? count($questions) : 0;
+
+            $statusQuery = clone $baseQuery;
+            if ($fromDate) {
+                $statusQuery->where('created_at', '>=', $fromDate);
+            }
+            if ($toDate) {
+                $statusQuery->where('created_at', '<=', $toDate);
+            }
+
+            $completed = 0;
+            $inProgress = 0;
+            $abandoned = 0;
+
+            foreach ($statusQuery->get(['answers']) as $resp) {
+                $answers = $resp->answers ?? [];
+                $answeredCount = is_array($answers) ? count($answers) : 0;
+
+                if ($questionCount === 0) {
+                    $completed++;
+
+                    continue;
+                }
+
+                if ($answeredCount >= $questionCount) {
+                    $completed++;
+                } elseif ($answeredCount > 0) {
+                    $inProgress++;
+                } else {
+                    $abandoned++;
+                }
+            }
+
+            $stats['response_status'] = [
+                'labels' => ['Completadas', 'En progreso', 'Abandonadas'],
+                'data' => [$completed, $inProgress, $abandoned],
+            ];
 
             if ($fromDate && $toDate) {
                 $periodDays = $fromDate->diffInDays($toDate) + 1;
@@ -102,9 +141,9 @@ class StatisticsController extends Controller
                 ->whereBetween('created_at', [$evolutionStartDate, $evolutionEndDate])
                 ->get(['created_at']);
 
-            $groupedByDate = $rawResponses->groupBy(function($item) {
+            $groupedByDate = $rawResponses->groupBy(function ($item) {
                 return $item->created_at->format('Y-m-d');
-            })->map(function($group) {
+            })->map(function ($group) {
                 return $group->count();
             });
 
@@ -121,12 +160,11 @@ class StatisticsController extends Controller
 
             $stats['responses_per_day'] = [
                 'labels' => $labelsEvolution,
-                'data' => $dataEvolution
+                'data' => $dataEvolution,
             ];
 
             $targetQuestion = null;
-            $questions = $selectedSurvey->questions ?? [];
-            
+
             foreach ($questions as $q) {
                 if (in_array($q['type'], ['multiple_choice', 'checkboxes', 'dropdown'])) {
                     $targetQuestion = $q;
@@ -148,7 +186,7 @@ class StatisticsController extends Controller
                 }
 
                 $allResponses = $distributionQuery->get();
-                
+
                 foreach ($allResponses as $resp) {
                     $answers = $resp->answers ?? [];
                     // Buscar la respuesta a esta pregunta
@@ -157,23 +195,27 @@ class StatisticsController extends Controller
                         $val = $answers[$qText];
                         if (is_array($val)) { // Checkboxes
                             foreach ($val as $v) {
-                                if (isset($counts[$v])) $counts[$v]++;
+                                if (isset($counts[$v])) {
+                                    $counts[$v]++;
+                                }
                             }
                         } else { // Radio/Select
-                            if (isset($counts[$val])) $counts[$val]++;
+                            if (isset($counts[$val])) {
+                                $counts[$val]++;
+                            }
                         }
                     }
                 }
 
                 $stats['responses_distribution'] = [
                     'labels' => array_keys($counts),
-                    'data' => array_values($counts)
+                    'data' => array_values($counts),
                 ];
             } else {
                 // Si no hay preguntas cerradas, mostrar mensaje vacío o contar total
-                 $stats['responses_distribution'] = [
+                $stats['responses_distribution'] = [
                     'labels' => ['Sin preguntas cerradas'],
-                    'data' => [0]
+                    'data' => [0],
                 ];
             }
 
@@ -187,22 +229,24 @@ class StatisticsController extends Controller
 
             $recent = $recentQuery->orderBy('created_at', 'desc')->take(10)->get();
             $formattedRecent = [];
-            
+
             foreach ($recent as $r) {
                 // Generar resumen (primeras 3 respuestas)
                 $summaryParts = [];
                 $answers = $r->answers ?? [];
                 $i = 0;
                 foreach ($answers as $q => $a) {
-                    if ($i >= 3) break;
+                    if ($i >= 3) {
+                        break;
+                    }
                     $val = is_array($a) ? implode(', ', $a) : $a;
                     $summaryParts[] = Str::limit($val, 20);
                     $i++;
                 }
-                
+
                 $formattedRecent[] = [
                     'date' => $r->created_at->format('d/m/Y, h:i a'),
-                    'summary' => implode(' | ', $summaryParts)
+                    'summary' => implode(' | ', $summaryParts),
                 ];
             }
             $stats['recent_responses'] = $formattedRecent;

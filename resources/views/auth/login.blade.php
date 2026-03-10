@@ -334,6 +334,49 @@
   .btn-login:hover::after { opacity: 1; }
   .btn-login:active { transform: translateY(0); }
 
+  .btn-microsoft {
+    width: 100%;
+    margin-top: 12px;
+    padding: 14px 20px;
+    background: var(--blanco);
+    color: #111827;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-microsoft:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+    border-color: rgba(17, 24, 39, 0.18);
+  }
+
+  .btn-microsoft:active { transform: translateY(0); }
+
+  .ms-mark {
+    width: 16px;
+    height: 16px;
+    display: inline-grid;
+    grid-template-columns: repeat(2, 7px);
+    grid-template-rows: repeat(2, 7px);
+    gap: 2px;
+  }
+
+  .ms-mark span { display: block; border-radius: 1px; }
+  .ms-mark span:nth-child(1) { background: #f25022; }
+  .ms-mark span:nth-child(2) { background: #7fba00; }
+  .ms-mark span:nth-child(3) { background: #00a4ef; }
+  .ms-mark span:nth-child(4) { background: #ffb900; }
+
   .demo-box {
     margin-top: 24px;
     background: var(--crema);
@@ -541,6 +584,27 @@
         </button>
 
       </form>
+
+      <form id="microsoft-login-form" action="{{ route('login.uaemex') }}" method="POST">
+        @csrf
+        <input type="hidden" name="email" id="microsoft-email" value="">
+        <button type="submit" class="btn-microsoft" id="microsoft-login-button">
+          <span class="ms-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+          Iniciar con Microsoft
+        </button>
+      </form>
+
+      <script>
+        (function () {
+          var msForm = document.getElementById('microsoft-login-form');
+          var msEmail = document.getElementById('microsoft-email');
+          var emailInput = document.getElementById('email');
+          if (!msForm || !msEmail || !emailInput) return;
+          msForm.addEventListener('submit', function () {
+            msEmail.value = emailInput.value || '';
+          });
+        })();
+      </script>
 
 
       <div class="register-row">

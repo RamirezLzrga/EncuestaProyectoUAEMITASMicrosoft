@@ -3,6 +3,12 @@
 @section('title', 'Estadísticas')
 
 @section('content')
+@php
+    $responseStatusData = data_get($stats, 'response_status.data', [0, 0, 0]);
+    if (!is_array($responseStatusData) || count($responseStatusData) !== 3) {
+        $responseStatusData = [0, 0, 0];
+    }
+@endphp
 <div class="stats-container space-y-8 font-sans">
     
     <!-- Header -->
@@ -174,21 +180,21 @@
                             <span class="w-3 h-3 rounded bg-uaemex"></span>
                             <span class="text-gray-600 font-medium">Completadas</span>
                         </div>
-                        <span class="font-bold text-gray-800">{{ $stats['response_status']['data'][0] ?? 0 }}</span>
+                        <span class="font-bold text-gray-800">{{ $responseStatusData[0] ?? 0 }}</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
                         <div class="flex items-center gap-2">
                             <span class="w-3 h-3 rounded bg-oro"></span>
                             <span class="text-gray-600 font-medium">En progreso</span>
                         </div>
-                        <span class="font-bold text-gray-800">{{ $stats['response_status']['data'][1] ?? 0 }}</span>
+                        <span class="font-bold text-gray-800">{{ $responseStatusData[1] ?? 0 }}</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
                         <div class="flex items-center gap-2">
                             <span class="w-3 h-3 rounded bg-gray-300"></span>
                             <span class="text-gray-600 font-medium">Abandonadas</span>
                         </div>
-                        <span class="font-bold text-gray-800">{{ $stats['response_status']['data'][2] ?? 0 }}</span>
+                        <span class="font-bold text-gray-800">{{ $responseStatusData[2] ?? 0 }}</span>
                     </div>
                 </div>
             </div>
@@ -299,7 +305,7 @@
                 data: {
                     labels: ['Completadas', 'En progreso', 'Abandonadas'],
                     datasets: [{
-                        data: @json($stats['response_status']['data']),
+                        data: @json($responseStatusData),
                         backgroundColor: ['#2D5016', '#C99A0A', '#d1d5db'],
                         borderWidth: 0,
                         hoverOffset: 4
