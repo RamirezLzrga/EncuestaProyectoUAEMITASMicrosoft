@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Survey;
+use App\Models\SurveyResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -252,10 +253,40 @@ class StatisticsController extends Controller
             $stats['recent_responses'] = $formattedRecent;
         }
 
+        $topSurveys = collect();
+        if ($surveys->isNotEmpty()) {
+            $surveyIds = $surveys->pluck('id')->all();
+
+            $responsesQuery = SurveyResponse::whereIn('survey_id', $surveyIds);
+            if ($fromDate) {
+                $responsesQuery->where('created_at', '>=', $fromDate);
+            }
+            if ($toDate) {
+                $responsesQuery->where('created_at', '<=', $toDate);
+            }
+
+            $countsByStringId = $responsesQuery
+                ->get(['survey_id'])
+                ->groupBy('survey_id')
+                ->map(fn ($items) => $items->count())
+                ->mapWithKeys(fn ($count, $surveyId) => [(string) $surveyId => $count])
+                ->all();
+
+            $topSurveys = $surveys
+                ->map(function ($survey) use ($countsByStringId) {
+                    $survey->responses_count = $countsByStringId[(string) $survey->id] ?? 0;
+
+                    return $survey;
+                })
+                ->sortByDesc('responses_count')
+                ->take(5)
+                ->values();
+        }
+
         $view = $user && $user->role === 'admin'
             ? 'statistics.index'
             : 'editor.statistics.index';
 
-        return view($view, compact('surveys', 'selectedSurvey', 'stats'));
+        return view($view, compact('surveys', 'selectedSurvey', 'stats', 'topSurveys'));
     }
 }

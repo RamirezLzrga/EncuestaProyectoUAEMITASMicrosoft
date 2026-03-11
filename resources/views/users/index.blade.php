@@ -2,134 +2,220 @@
 
 @section('title', 'Usuarios')
 
+@push('styles')
+    <style>
+        body { overflow: hidden; }
+        .wrapper { height: 100vh; overflow: hidden; }
+        #users-page { height: 100%; display: flex; flex-direction: column; max-width: 1100px; margin: 0 auto; }
+        #users-results { flex: 1; min-height: 0; overflow: hidden; }
+        #users-list { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+        #users-scroll { flex: 1; min-height: 0; overflow: auto; padding: 8px; }
+        #users-pagination { padding: 12px 8px 4px; }
+    </style>
+@endpush
+
 @section('content')
-    <div class="ph">
-        <div class="ph-left">
-            <div class="ph-label">Administración</div>
-            <div class="ph-title">Usuarios del Sistema</div>
-            <div class="ph-sub">Gestiona roles, estados y permisos</div>
-        </div>
-        <div class="ph-actions">
-            <a href="{{ route('users.create') }}" class="btn btn-solid" data-users-modal="create">+ Nuevo Usuario</a>
-        </div>
-    </div>
-
-    <div class="neu-card" style="padding:16px;">
-        <form id="users-filter-form" method="GET" action="{{ route('users.index') }}" style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:13px; font-weight:700; color:var(--text-muted);">Rol:</span>
-                <div style="position:relative;">
-                    <select name="role" class="form-input" style="padding-right:30px; width:auto; min-width:140px;">
-                        <option value="Todos" {{ request('role') == 'Todos' ? 'selected' : '' }}>Todos</option>
-                        <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Administrador</option>
-                        <option value="editor" {{ request('role') == 'editor' ? 'selected' : '' }}>Editor</option>
-                        <option value="viewer" {{ request('role') == 'viewer' ? 'selected' : '' }}>Solo vista</option>
-                    </select>
+    <div id="users-page">
+        <div style="display:flex; justify-content:center; align-items:flex-end; margin-bottom:22px; text-align:center;">
+            <div>
+                <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:6px;">
+                    <div style="font-size:11px; font-weight:800; color:var(--oro); letter-spacing:1px; text-transform:uppercase;">ADMINISTRACIÓN</div>
                 </div>
+                <h1 style="font-family:'Sora',sans-serif; font-size:32px; font-weight:700; color:var(--text-dark); margin-bottom:8px;">Usuarios del Sistema</h1>
+                <p style="color:var(--text-muted);">Gestiona roles, estados y permisos</p>
             </div>
+        </div>
 
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:13px; font-weight:700; color:var(--text-muted);">Estado:</span>
-                <div style="position:relative;">
-                    <select name="status" class="form-input" style="padding-right:30px; width:auto; min-width:140px;">
-                        <option value="Todos" {{ request('status') == 'Todos' ? 'selected' : '' }}>Todos</option>
-                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Activo</option>
-                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactivo</option>
-                    </select>
+        <div class="neu-card" style="padding:16px 18px; margin-bottom:18px;">
+            <form id="users-filter-form" method="GET" action="{{ route('users.index') }}" style="display:flex; gap:12px; align-items:center;">
+                <div style="flex:1; display:flex; align-items:center; gap:8px; background:var(--bg); border-radius:var(--radius); box-shadow:var(--neu-in-sm); padding:0 12px; min-width:260px;">
+                    <span style="font-size:16px;">🔍</span>
+                    <input id="users-live-search" type="text" name="search" value="{{ request('search') }}" placeholder="Buscar usuario..."
+                        style="border:none; background:transparent; padding:12px 0; font-family:'Nunito',sans-serif; font-size:14px; width:100%; outline:none; color:var(--text);">
                 </div>
-            </div>
+                <a href="{{ route('users.create') }}" class="btn btn-solid" style="white-space:nowrap;" data-users-modal="create">+ Agregar</a>
+            </form>
+        </div>
 
-            <div style="flex:1; display:flex; align-items:center; gap:8px; background:var(--bg); border-radius:var(--radius); box-shadow:var(--neu-in-sm); padding:0 12px;">
-                <span style="font-size:16px;">🔍</span>
-                <input id="users-live-search" type="text" name="search" value="{{ request('search') }}" placeholder="Buscar usuario..."
-                       style="border:none; background:transparent; padding:12px 0; font-family:'Nunito',sans-serif; font-size:14px; width:100%; outline:none; color:var(--text);">
-            </div>
-
-            <button type="submit" class="btn btn-neu btn-sm">Filtrar</button>
-        </form>
-    </div>
-
-    <div id="users-results">
-        <div class="neu-card" style="padding:14px; margin-top:22px;">
-            <div style="height:calc(100vh - 285px); min-height:360px; display:flex; flex-direction:column; overflow:hidden;">
-                <div style="flex:1; overflow:auto; padding:8px;">
-                    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:22px;">
-                        @forelse($users as $u)
-                            <div class="neu-card" style="display:flex; flex-direction:column; gap:14px; margin-bottom:0; align-items:center; text-align:center;">
-                                <div style="width:64px; height:64px; border-radius:50%; background:var(--verde); color:var(--oro-bright); display:grid; place-items:center; font-family:'Sora',sans-serif; font-weight:700; font-size:24px; box-shadow:var(--neu-out);">
-                                    {{ strtoupper(substr($u->name,0,1)) }}
-                                </div>
-
-                                <div>
-                                    <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:16px; color:var(--text-dark);">{{ $u->name }}</div>
-                                    <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">{{ $u->email }}</div>
-                                </div>
-
-                                <div style="display:flex; gap:8px;">
-                                    <span class="status-pill" style="background:var(--bg); color:{{ $u->role==='admin' ? 'var(--verde)' : ($u->role==='editor' ? 'var(--blue)' : 'var(--text)') }}; font-size:10px; padding:4px 10px;">
-                                        {{ ucfirst($u->role) }}
-                                    </span>
-                                    <span class="status-pill" style="background:var(--bg); color:{{ $u->status==='active' ? 'var(--green)' : 'var(--red)' }}; font-size:10px; padding:4px 10px;">
-                                        {{ $u->status==='active' ? '● Activo' : '○ Inactivo' }}
-                                    </span>
-                                </div>
-
-                                <div style="display:flex; gap:12px; width:100%; margin-top:4px;">
-                                    <div style="flex:1; background:var(--bg-light); border-radius:var(--radius-sm); padding:8px;">
-                                        <div style="font-size:14px; font-weight:700; color:var(--text-dark);">—</div>
-                                        <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Encuestas</div>
-                                    </div>
-                                    <div style="flex:1; background:var(--bg-light); border-radius:var(--radius-sm); padding:8px;">
-                                        <div style="font-size:14px; font-weight:700; color:var(--text-dark);">—</div>
-                                        <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Acciones</div>
-                                    </div>
-                                </div>
-
-                                <div style="display:flex; gap:8px; width:100%; margin-top:6px;">
-                                    <a href="{{ route('users.edit', $u->id) }}" class="btn btn-neu btn-sm" style="flex:1; justify-content:center;" data-users-modal="edit">✏ Editar</a>
-                                    @php
-                                        $toggleUrl = \Illuminate\Support\Facades\Route::has('users.toggle-status')
-                                            ? route('users.toggle-status', $u->id)
-                                            : url('/users/' . $u->id . '/toggle-status');
-                                    @endphp
-                                    <form
-                                        action="{{ $toggleUrl }}"
-                                        method="POST"
-                                        style="flex:1;"
-                                        data-confirm-title="Confirmación"
-                                        data-confirm-message="{{ $u->status==='active' ? '¿Inactivar usuario?' : '¿Activar usuario?' }}"
-                                        data-confirm-button="{{ $u->status==='active' ? 'Inactivar' : 'Activar' }}"
-                                        data-confirm-button-class="{{ $u->status==='active' ? 'btn-danger' : 'btn-oro' }}"
-                                    >
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="btn {{ $u->status==='active' ? 'btn-danger' : 'btn-oro' }} btn-sm" style="width:100%; justify-content:center;">
-                                            {{ $u->status==='active' ? 'Inactivar' : 'Activar' }}
-                                        </button>
-                                    </form>
-                                    <form
-                                        action="{{ route('users.destroy', $u->id) }}"
-                                        method="POST"
-                                        data-confirm-title="Confirmación"
-                                        data-confirm-message="¿Eliminar usuario?"
-                                        data-confirm-button="Eliminar"
-                                        data-confirm-button-class="btn-danger"
-                                    >
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm" style="padding:8px 12px;">🗑</button>
-                                    </form>
-                                </div>
+        <div id="users-results" class="neu-card" style="padding:14px; display:flex; flex-direction:column;">
+            <div id="users-list">
+                <div id="users-scroll">
+                    @php
+                        $usersActive = $users->getCollection()->filter(fn ($uu) => ($uu->status ?? null) === 'active');
+                        $usersInactive = $users->getCollection()->filter(fn ($uu) => ($uu->status ?? null) === 'inactive');
+                    @endphp
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+                        <div style="display:flex; flex-direction:column; gap:14px;">
+                            <div class="neu-card" style="padding:12px 14px; display:flex; align-items:center; gap:10px;">
+                                <span style="width:10px; height:10px; border-radius:50%; background:var(--green); box-shadow:0 6px 14px rgba(0,0,0,0.08);"></span>
+                                <span style="font-family:'Sora',sans-serif; font-weight:900; color:var(--text-dark);">Activos</span>
                             </div>
-                        @empty
-                            <div class="neu-card" style="grid-column: 1 / -1; text-align:center; color:var(--text-muted);">
-                                No se encontraron usuarios.
+                            @forelse($usersActive as $u)
+                                <div class="neu-card" style="display:flex; align-items:center; gap:14px; margin-bottom:0; position:relative; overflow:hidden; padding:14px 14px 14px 28px; flex-wrap:wrap;">
+                                    <div style="position:absolute; left:12px; top:14px; bottom:14px; width:6px; border-radius:999px; background:var(--green);"></div>
+
+                                    <div style="width:52px; height:52px; border-radius:50%; background:var(--verde); color:var(--oro-bright); display:grid; place-items:center; font-family:'Sora',sans-serif; font-weight:700; font-size:20px; box-shadow:var(--neu-out); flex:0 0 auto;">
+                                        {{ strtoupper(substr($u->name,0,1)) }}
+                                    </div>
+
+                                    <div style="min-width:220px; flex:1; display:flex; flex-direction:column; gap:6px;">
+                                        <div style="min-width:0;">
+                                            <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:16px; color:var(--text-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $u->name }}</div>
+                                            <div style="font-size:12px; color:var(--text-muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $u->email }}</div>
+                                        </div>
+
+                                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                            <span class="status-pill" style="background:var(--bg); color:{{ $u->role==='admin' ? 'var(--verde)' : ($u->role==='editor' ? 'var(--blue)' : 'var(--text)') }}; font-size:10px; padding:4px 10px;">
+                                                {{ ucfirst($u->role) }}
+                                            </span>
+                                            <span class="status-pill" style="background:var(--green-pale); color:var(--green); font-size:10px; padding:4px 10px;">
+                                                ● Activo
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; flex:0 0 auto;">
+                                        <div style="display:flex; gap:10px;">
+                                            <div style="width:96px; background:var(--bg-light); border-radius:var(--radius-sm); padding:8px; text-align:center;">
+                                                <div style="font-size:14px; font-weight:700; color:var(--text-dark); line-height:1;">{{ $u->surveys_count ?? 0 }}</div>
+                                                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:4px;">Encuestas</div>
+                                            </div>
+                                            <div style="width:96px; background:var(--bg-light); border-radius:var(--radius-sm); padding:8px; text-align:center;">
+                                                <div style="font-size:14px; font-weight:700; color:var(--text-dark); line-height:1;">{{ $u->actions_count ?? 0 }}</div>
+                                                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:4px;">Acciones</div>
+                                            </div>
+                                        </div>
+
+                                        <div style="display:flex; gap:8px;">
+                                            <a href="{{ route('users.edit', $u->id) }}" class="btn btn-neu btn-sm" style="justify-content:center;" data-users-modal="edit">✏ Editar</a>
+                                            @php
+                                                $toggleUrl = \Illuminate\Support\Facades\Route::has('users.toggle-status')
+                                                    ? route('users.toggle-status', $u->id)
+                                                    : url('/users/' . $u->id . '/toggle-status');
+                                            @endphp
+                                            <form
+                                                action="{{ $toggleUrl }}"
+                                                method="POST"
+                                                data-confirm-title="Confirmación"
+                                                data-confirm-message="¿Inactivar usuario?"
+                                                data-confirm-button="Inactivar"
+                                                data-confirm-button-class="btn-danger"
+                                            >
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-danger btn-sm" style="justify-content:center;">
+                                                    Inactivar
+                                                </button>
+                                            </form>
+                                            <form
+                                                action="{{ route('users.destroy', $u->id) }}"
+                                                method="POST"
+                                                data-confirm-title="Confirmación"
+                                                data-confirm-message="¿Eliminar usuario?"
+                                                data-confirm-button="Eliminar"
+                                                data-confirm-button-class="btn-danger"
+                                            >
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm" style="padding:8px 12px;">🗑</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="neu-card" style="text-align:center; color:var(--text-muted);">
+                                    No hay usuarios activos.
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:14px;">
+                            <div class="neu-card" style="padding:12px 14px; display:flex; align-items:center; gap:10px;">
+                                <span style="width:10px; height:10px; border-radius:50%; background:var(--red); box-shadow:0 6px 14px rgba(0,0,0,0.08);"></span>
+                                <span style="font-family:'Sora',sans-serif; font-weight:900; color:var(--text-dark);">Inactivos</span>
                             </div>
-                        @endforelse
+                            @forelse($usersInactive as $u)
+                                <div class="neu-card" style="display:flex; align-items:center; gap:14px; margin-bottom:0; position:relative; overflow:hidden; padding:14px 14px 14px 28px; flex-wrap:wrap;">
+                                    <div style="position:absolute; left:12px; top:14px; bottom:14px; width:6px; border-radius:999px; background:var(--red);"></div>
+
+                                    <div style="width:52px; height:52px; border-radius:50%; background:var(--verde); color:var(--oro-bright); display:grid; place-items:center; font-family:'Sora',sans-serif; font-weight:700; font-size:20px; box-shadow:var(--neu-out); flex:0 0 auto;">
+                                        {{ strtoupper(substr($u->name,0,1)) }}
+                                    </div>
+
+                                    <div style="min-width:220px; flex:1; display:flex; flex-direction:column; gap:6px;">
+                                        <div style="min-width:0;">
+                                            <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:16px; color:var(--text-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $u->name }}</div>
+                                            <div style="font-size:12px; color:var(--text-muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $u->email }}</div>
+                                        </div>
+
+                                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                            <span class="status-pill" style="background:var(--bg); color:{{ $u->role==='admin' ? 'var(--verde)' : ($u->role==='editor' ? 'var(--blue)' : 'var(--text)') }}; font-size:10px; padding:4px 10px;">
+                                                {{ ucfirst($u->role) }}
+                                            </span>
+                                            <span class="status-pill" style="background:var(--red-pale); color:var(--red); font-size:10px; padding:4px 10px;">
+                                                ● Inactivo
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; flex:0 0 auto;">
+                                        <div style="display:flex; gap:10px;">
+                                            <div style="width:96px; background:var(--bg-light); border-radius:var(--radius-sm); padding:8px; text-align:center;">
+                                                <div style="font-size:14px; font-weight:700; color:var(--text-dark); line-height:1;">{{ $u->surveys_count ?? 0 }}</div>
+                                                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:4px;">Encuestas</div>
+                                            </div>
+                                            <div style="width:96px; background:var(--bg-light); border-radius:var(--radius-sm); padding:8px; text-align:center;">
+                                                <div style="font-size:14px; font-weight:700; color:var(--text-dark); line-height:1;">{{ $u->actions_count ?? 0 }}</div>
+                                                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:4px;">Acciones</div>
+                                            </div>
+                                        </div>
+
+                                        <div style="display:flex; gap:8px;">
+                                            <a href="{{ route('users.edit', $u->id) }}" class="btn btn-neu btn-sm" style="justify-content:center;" data-users-modal="edit">✏ Editar</a>
+                                            @php
+                                                $toggleUrl = \Illuminate\Support\Facades\Route::has('users.toggle-status')
+                                                    ? route('users.toggle-status', $u->id)
+                                                    : url('/users/' . $u->id . '/toggle-status');
+                                            @endphp
+                                            <form
+                                                action="{{ $toggleUrl }}"
+                                                method="POST"
+                                                data-confirm-title="Confirmación"
+                                                data-confirm-message="¿Activar usuario?"
+                                                data-confirm-button="Activar"
+                                                data-confirm-button-class="btn-oro"
+                                            >
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-oro btn-sm" style="justify-content:center;">
+                                                    Activar
+                                                </button>
+                                            </form>
+                                            <form
+                                                action="{{ route('users.destroy', $u->id) }}"
+                                                method="POST"
+                                                data-confirm-title="Confirmación"
+                                                data-confirm-message="¿Eliminar usuario?"
+                                                data-confirm-button="Eliminar"
+                                                data-confirm-button-class="btn-danger"
+                                            >
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger btn-sm" style="padding:8px 12px;">🗑</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="neu-card" style="text-align:center; color:var(--text-muted);">
+                                    No hay usuarios inactivos.
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
 
-                <div style="padding:12px 8px 4px;">
+                <div id="users-pagination">
                     {{ $users->appends(request()->query())->links() }}
                 </div>
             </div>
@@ -197,8 +283,6 @@
                 if (!form) return;
 
                 var search = document.getElementById('users-live-search');
-                var role = form.querySelector('select[name="role"]');
-                var status = form.querySelector('select[name="status"]');
                 var results = document.getElementById('users-results');
                 if (!results) return;
 
@@ -665,8 +749,6 @@
                 });
 
                 if (search) search.addEventListener('input', submitDebounced);
-                if (role) role.addEventListener('change', function () { triggerFetch(); });
-                if (status) status.addEventListener('change', function () { triggerFetch(); });
             })();
         </script>
     @endpush

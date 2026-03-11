@@ -56,6 +56,34 @@ class UserController extends Controller
 
         $users = $query->paginate(10);
 
+        $userIds = $users->getCollection()->pluck('id')->map(fn ($id) => (string) $id)->values()->all();
+
+        $surveyCounts = [];
+        if (! empty($userIds)) {
+            $surveyCounts = Survey::whereIn('user_id', $userIds)
+                ->get(['user_id'])
+                ->groupBy('user_id')
+                ->map(fn ($items) => $items->count())
+                ->all();
+        }
+
+        $actionCounts = [];
+        if (! empty($userIds)) {
+            $actionCounts = ActivityLog::whereIn('user_id', $userIds)
+                ->get(['user_id'])
+                ->groupBy('user_id')
+                ->map(fn ($items) => $items->count())
+                ->all();
+        }
+
+        $users->getCollection()->transform(function ($user) use ($surveyCounts, $actionCounts) {
+            $userId = (string) $user->id;
+            $user->surveys_count = $surveyCounts[$userId] ?? 0;
+            $user->actions_count = $actionCounts[$userId] ?? 0;
+
+            return $user;
+        });
+
         return view('users.index', compact('users'));
     }
 
@@ -279,12 +307,6 @@ class UserController extends Controller
 
         $userName = $user->name;
 
-        $adminFallback = User::where('role', 'admin')->orderBy('created_at')->first();
-
-        if ($adminFallback) {
-            Survey::where('user_id', $user->id)->update(['user_id' => $adminFallback->id]);
-        }
-
         $user->delete();
 
         // Log Activity
@@ -292,7 +314,7 @@ class UserController extends Controller
             'user_id' => Auth::id(),
             'user_email' => Auth::user()->email,
             'action' => 'delete',
-            'description' => 'Eliminó usuario: '.$userName.($adminFallback ? ' (encuestas transferidas a '.$adminFallback->name.')' : ''),
+            'description' => 'Eliminó usuario: '.$userName,
             'type' => 'user',
             'ip_address' => $request->ip(),
             'details' => ['user_id' => $id],

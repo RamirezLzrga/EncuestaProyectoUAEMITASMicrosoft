@@ -30,6 +30,8 @@
             $badgeColor = '#7e22ce'; // Purple 700
             $iconBg = 'rgba(142, 68, 173, 0.1)';
         }
+
+        $createdAt = $log->created_at ? $log->created_at->timezone(config('app.timezone')) : null;
     @endphp
 
     <div class="neu-card" style="padding:20px; margin-bottom:0; display:flex; align-items:center; gap:20px; transition:transform 0.2s;">
@@ -58,10 +60,10 @@
         {{-- Time --}}
         <div style="text-align:right; flex-shrink:0;">
             <div style="font-size:13px; font-weight:700; color:var(--text-light); font-family:'JetBrains Mono',monospace;">
-                {{ $log->created_at->format('d/m/Y') }}
+                {{ $createdAt ? $createdAt->format('d/m/Y') : '' }}
             </div>
             <div style="font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">
-                {{ $log->created_at->format('h:i a') }}
+                {{ $createdAt ? $createdAt->format('h:i a') : '' }}
             </div>
         </div>
     </div>
@@ -76,7 +78,3 @@
         <p style="color:var(--text-muted); font-size:14px;">Intenta cambiar los filtros o el período de búsqueda.</p>
     </div>
 @endif
-
-<div style="margin-top:20px;">
-    {{ $logs->appends(request()->query())->links() }}
-</div>

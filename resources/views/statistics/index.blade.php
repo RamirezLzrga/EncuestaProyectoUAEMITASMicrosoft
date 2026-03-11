@@ -110,9 +110,9 @@
     <div style="display:grid; grid-template-columns: 2fr 1fr; gap:30px;">
         
         {{-- Chart Section --}}
-        <div class="neu-card" style="padding:24px; min-height:300px;">
+        <div class="neu-card" style="padding:24px; min-height:300px; display:flex; flex-direction:column;">
             <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin-bottom:20px;">Distribución de Respuestas por Día</h3>
-            <div style="position:relative; height:220px; width:100%;">
+            <div style="position:relative; width:100%; flex:1; min-height:0;">
                 <canvas id="responsesChart"></canvas>
             </div>
         </div>
@@ -153,8 +153,7 @@
             const labels = @json($stats['responses_per_day']['labels']);
             const data = @json($stats['responses_per_day']['data']);
 
-            // If data is empty (no responses), show dummy visualization for UI demo purposes? 
-            // Better to show real empty chart.
+            const hasData = Array.isArray(data) && data.some((v) => Number(v) > 0);
             
             new Chart(ctx, {
                 type: 'line',
@@ -163,17 +162,15 @@
                     datasets: [{
                         label: 'Respuestas',
                         data: data,
-                        backgroundColor: '#2D5016',
+                        backgroundColor: 'rgba(45, 80, 22, 0.12)',
                         borderColor: '#2D5016',
-                        borderWidth: 0,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        pointBackgroundColor: function(context) {
-                            // Alternating colors for bubbles style in the image
-                            const colors = ['#2D5016', '#C99A0A', '#3a6b1c', '#f5e6a3'];
-                            return colors[context.dataIndex % colors.length];
-                        },
-                        showLine: false // Scatter style as in image
+                        borderWidth: 3,
+                        tension: 0.35,
+                        fill: true,
+                        pointRadius: hasData ? 4 : 0,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#2D5016',
+                        pointBorderWidth: 0
                     }]
                 },
                 options: {
@@ -190,13 +187,16 @@
                     },
                     scales: {
                         y: {
-                            display: false, // Hide Y axis as in image
-                            beginAtZero: true
+                            display: true,
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.06)' },
+                            ticks: { color: '#6B7280', font: { size: 11, weight: '700' } },
+                            border: { display: false }
                         },
                         x: {
                             grid: { display: false },
                             border: { display: false },
-                            ticks: { display: false } // Hide X axis labels for cleaner look or keep them? Image shows no axis.
+                            ticks: { color: '#6B7280', font: { size: 11, weight: '700' }, maxRotation: 0, autoSkip: true }
                         }
                     },
                     layout: {

@@ -10,21 +10,14 @@ class ActivityLogController extends Controller
     public function index(Request $request)
     {
         $query = ActivityLog::with('user')->orderBy('created_at', 'desc');
+        $cutoff = now()->subDays(5)->startOfDay();
+        $query->where('created_at', '>=', $cutoff);
 
         // Filtro por Período
         if ($request->has('period')) {
             switch ($request->period) {
                 case 'today':
                     $query->where('created_at', '>=', now()->startOfDay());
-                    break;
-                case 'week':
-                    $query->where('created_at', '>=', now()->subDays(7));
-                    break;
-                case 'month':
-                    $query->where('created_at', '>=', now()->subMonth());
-                    break;
-                case 'year': // Para compatibilidad con el diseño que menciona 2025
-                    $query->where('created_at', '>=', now()->startOfYear());
                     break;
             }
         }
@@ -46,21 +39,14 @@ class ActivityLogController extends Controller
     public function export(Request $request)
     {
         $query = ActivityLog::orderBy('created_at', 'desc');
+        $cutoff = now()->subDays(5)->startOfDay();
+        $query->where('created_at', '>=', $cutoff);
 
         // Filtro por Período
         if ($request->has('period')) {
             switch ($request->period) {
                 case 'today':
                     $query->where('created_at', '>=', now()->startOfDay());
-                    break;
-                case 'week':
-                    $query->where('created_at', '>=', now()->subDays(7));
-                    break;
-                case 'month':
-                    $query->where('created_at', '>=', now()->subMonth());
-                    break;
-                case 'year':
-                    $query->where('created_at', '>=', now()->startOfYear());
                     break;
             }
         }

@@ -13,7 +13,6 @@
             </div>
         </div>
         <div class="ph-actions">
-            <a href="{{ route('activity-logs.export') }}" class="btn btn-neu">↓ Exportar</a>
             <a href="{{ route('admin.reportes') }}" class="btn btn-oro">⬡ Generar Reporte</a>
         </div>
     </div>
