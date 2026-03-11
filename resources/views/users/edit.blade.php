@@ -16,7 +16,6 @@
         </div>
 
         <div class="neu-card" style="padding:0; overflow:hidden;">
-            <div style="height:6px; background:var(--oro); width:100%;"></div>
             <form action="{{ route('users.update', $user->id) }}" method="POST" class="p-8">
                 @csrf
                 @method('PUT')
@@ -24,8 +23,8 @@
                 <div class="space-y-6">
                     <!-- Nombre -->
                     <div>
-                        <label for="name" class="block text-sm font-bold text-gray-700 mb-2">Nombre Completo</label>
-                        <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition" required>
+                        <label for="name" class="form-label">Nombre Completo</label>
+                        <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" class="form-input" required>
                         @error('name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -33,18 +32,18 @@
 
                     <!-- Email -->
                     <div>
-                        <label for="email" class="block text-sm font-bold text-gray-700 mb-2">Correo Electrónico</label>
-                        <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition" required>
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="form-input" required>
                         @error('email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid-2">
                         <!-- Password -->
                         <div>
-                            <label for="password" class="block text-sm font-bold text-gray-700 mb-2">Contraseña (Opcional)</label>
-                            <input type="password" name="password" id="password" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition" placeholder="Dejar en blanco para mantener">
+                            <label for="password" class="form-label">Contraseña (Opcional)</label>
+                            <input type="password" name="password" id="password" class="form-input" placeholder="Dejar en blanco para mantener">
                             @error('password')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -52,16 +51,16 @@
 
                         <!-- Confirm Password -->
                         <div>
-                            <label for="password_confirmation" class="block text-sm font-bold text-gray-700 mb-2">Confirmar Contraseña</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition" placeholder="********">
+                            <label for="password_confirmation" class="form-label">Confirmar Contraseña</label>
+                            <input type="password" name="password_confirmation" id="password_confirmation" class="form-input" placeholder="********">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid-2">
                         <!-- Rol -->
-                        <div class="space-y-2">
-                            <label for="role" class="block text-sm font-medium text-gray-700">Rol del Usuario <span class="text-red-500">*</span></label>
-                            <select name="role" id="role" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-uaemex focus:border-uaemex transition-all bg-white">
+                        <div>
+                            <label for="role" class="form-label">Rol del Usuario <span class="text-red-500">*</span></label>
+                            <select name="role" id="role" required class="form-input">
                                 <option value="editor" {{ old('role', $user->role) == 'editor' ? 'selected' : '' }}>Editor</option>
                                 <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Administrador</option>
                             </select>
@@ -69,8 +68,8 @@
 
                         <!-- Estado -->
                         <div>
-                            <label for="status" class="block text-sm font-bold text-gray-700 mb-2">Estado</label>
-                            <select name="status" id="status" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition cursor-pointer">
+                            <label for="status" class="form-label">Estado</label>
+                            <select name="status" id="status" class="form-input">
                                 <option value="active" {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>Activo</option>
                                 <option value="inactive" {{ old('status', $user->status) == 'inactive' ? 'selected' : '' }}>Inactivo</option>
                             </select>
@@ -79,15 +78,12 @@
                             @enderror
                         </div>
                     </div>
+
                 </div>
 
                 <div class="mt-8 flex justify-end gap-3">
-                    <a href="{{ route('users.index') }}" class="bg-white text-gray-700 border border-gray-300 px-6 py-2 rounded-lg font-bold hover:bg-gray-50 transition">
-                        Cancelar
-                    </a>
-                    <button type="submit" class="bg-yellow-500 text-white px-8 py-2 rounded-lg font-bold hover:bg-yellow-600 transition shadow-md">
-                        Actualizar Usuario
-                    </button>
+                    <a href="{{ route('users.index') }}" class="btn btn-neu">Cancelar</a>
+                    <button type="submit" class="btn btn-solid">Actualizar Usuario</button>
                 </div>
             </form>
         </div>

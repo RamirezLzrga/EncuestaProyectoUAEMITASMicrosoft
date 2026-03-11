@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -21,8 +22,27 @@ class UserController extends Controller
         // Filtros
         if ($request->has('search') && ! empty($request->search)) {
             $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%'.$request->search.'%')
-                    ->orWhere('email', 'like', '%'.$request->search.'%');
+                $search = trim((string) $request->search);
+
+                $q->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhere('role', 'like', '%'.$search.'%')
+                    ->orWhere('status', 'like', '%'.$search.'%');
+
+                $searchLower = mb_strtolower($search);
+                if (in_array($searchLower, ['activo', 'activos'], true)) {
+                    $q->orWhere('status', 'active');
+                } elseif (in_array($searchLower, ['inactivo', 'inactivos'], true)) {
+                    $q->orWhere('status', 'inactive');
+                }
+
+                if (in_array($searchLower, ['administrador', 'admin', 'admins'], true)) {
+                    $q->orWhere('role', 'admin');
+                } elseif (in_array($searchLower, ['editor', 'editores'], true)) {
+                    $q->orWhere('role', 'editor');
+                } elseif (in_array($searchLower, ['viewer', 'vista', 'solo vista'], true)) {
+                    $q->orWhere('role', 'viewer');
+                }
             });
         }
 
@@ -52,13 +72,65 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+        $validateOnly = $request->expectsJson() && $request->boolean('validate_only');
+
+        $rules = [
+            'name' => 'required|string|max:255|unique:users,name',
+            'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:admin,editor',
             'status' => 'required|in:active,inactive',
-        ]);
+        ];
+
+        if ($request->expectsJson() && ! $validateOnly) {
+            $rules['admin_password'] = 'required|string';
+        }
+
+        $validated = $request->validate(
+            $rules,
+            [
+                'name.required' => 'El nombre es obligatorio.',
+                'name.string' => 'El nombre no es válido.',
+                'name.max' => 'El nombre no debe exceder 255 caracteres.',
+                'name.unique' => 'Este usuario ya existe.',
+
+                'email.required' => 'El correo es obligatorio.',
+                'email.email' => 'El correo no tiene un formato válido.',
+                'email.max' => 'El correo no debe exceder 255 caracteres.',
+                'email.unique' => 'Este usuario ya existe.',
+
+                'password.required' => 'La contraseña es obligatoria.',
+                'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+                'password.confirmed' => 'Las contraseñas no coinciden.',
+
+                'role.required' => 'El rol es obligatorio.',
+                'role.in' => 'El rol seleccionado no es válido.',
+
+                'status.required' => 'El estado es obligatorio.',
+                'status.in' => 'El estado seleccionado no es válido.',
+
+                'admin_password.required' => 'La contraseña es obligatoria.',
+            ],
+            [
+                'name' => 'nombre',
+                'email' => 'correo',
+                'password' => 'contraseña',
+                'password_confirmation' => 'confirmación de contraseña',
+                'admin_password' => 'contraseña',
+            ]
+        );
+
+        if ($validateOnly) {
+            return response()->json(['ok' => true]);
+        }
+
+        if ($request->expectsJson()) {
+            if (! Hash::check((string) $request->input('admin_password'), (string) Auth::user()->password)) {
+                throw ValidationException::withMessages([
+                    'admin_password' => ['Contraseña incorrecta.'],
+                ]);
+            }
+        }
 
         $user = User::create([
             'name' => $validated['name'],
@@ -78,6 +150,10 @@ class UserController extends Controller
             'ip_address' => $request->ip(),
             'details' => ['user_id' => $user->id],
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
 
         return redirect()->route('users.index')->with('success', 'Usuario creado exitosamente.');
     }
@@ -99,13 +175,64 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
+        $validateOnly = $request->expectsJson() && $request->boolean('validate_only');
+
+        $rules = [
+            'name' => 'required|string|max:255|unique:users,name,'.$id,
             'email' => 'required|string|email|max:255|unique:users,email,'.$id,
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|string|in:admin,editor',
             'status' => 'required|string|in:active,inactive',
-        ]);
+        ];
+
+        if ($request->expectsJson() && ! $validateOnly) {
+            $rules['admin_password'] = 'required|string';
+        }
+
+        $validated = $request->validate(
+            $rules,
+            [
+                'name.required' => 'El nombre es obligatorio.',
+                'name.string' => 'El nombre no es válido.',
+                'name.max' => 'El nombre no debe exceder 255 caracteres.',
+                'name.unique' => 'Este usuario ya existe.',
+
+                'email.required' => 'El correo es obligatorio.',
+                'email.email' => 'El correo no tiene un formato válido.',
+                'email.max' => 'El correo no debe exceder 255 caracteres.',
+                'email.unique' => 'Este usuario ya existe.',
+
+                'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+                'password.confirmed' => 'Las contraseñas no coinciden.',
+
+                'role.required' => 'El rol es obligatorio.',
+                'role.in' => 'El rol seleccionado no es válido.',
+
+                'status.required' => 'El estado es obligatorio.',
+                'status.in' => 'El estado seleccionado no es válido.',
+
+                'admin_password.required' => 'La contraseña es obligatoria.',
+            ],
+            [
+                'name' => 'nombre',
+                'email' => 'correo',
+                'password' => 'contraseña',
+                'password_confirmation' => 'confirmación de contraseña',
+                'admin_password' => 'contraseña',
+            ]
+        );
+
+        if ($validateOnly) {
+            return response()->json(['ok' => true]);
+        }
+
+        if ($request->expectsJson()) {
+            if (! Hash::check((string) $request->input('admin_password'), (string) Auth::user()->password)) {
+                throw ValidationException::withMessages([
+                    'admin_password' => ['Contraseña incorrecta.'],
+                ]);
+            }
+        }
 
         $data = [
             'name' => $validated['name'],
@@ -130,6 +257,10 @@ class UserController extends Controller
             'ip_address' => $request->ip(),
             'details' => ['user_id' => $user->id],
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
 
         return redirect()->route('users.index')->with('success', 'Usuario actualizado exitosamente.');
     }

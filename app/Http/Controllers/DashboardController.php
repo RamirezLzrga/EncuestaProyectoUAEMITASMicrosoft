@@ -194,7 +194,7 @@ class DashboardController extends Controller
             'systemActivity',
             'activityByDay',
             'monthlyActivity',
-            'recentActivity'
+            'recentActivity',
         ));
     }
 }
