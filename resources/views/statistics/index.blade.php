@@ -4,13 +4,12 @@
 
 @section('content')
     {{-- HEADER --}}
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px;">
+    <div style="position:relative; margin-bottom:30px; text-align:center;">
         <div>
-            <div style="font-size:11px; font-weight:800; color:var(--oro); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">ANÁLISIS</div>
             <h1 style="font-family:'Sora',sans-serif; font-size:32px; font-weight:700; color:var(--text-dark); margin-bottom:8px;">Estadísticas del Sistema</h1>
             <p style="color:var(--text-muted);">Métricas de respuestas, participación y tendencias</p>
         </div>
-        <div>
+        <div style="position:absolute; right:0; bottom:0;">
             <button class="btn-neu" style="padding:10px 20px; font-weight:700; display:flex; align-items:center; gap:8px; color:var(--text-dark);">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 Exportar
@@ -149,11 +148,17 @@
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('responsesChart').getContext('2d');
             
-            // Generate some random bubble/scatter data if empty, or use real data
             const labels = @json($stats['responses_per_day']['labels']);
             const data = @json($stats['responses_per_day']['data']);
 
             const hasData = Array.isArray(data) && data.some((v) => Number(v) > 0);
+
+            const root = document.documentElement;
+            const rootStyles = getComputedStyle(root);
+            const uaemex = (rootStyles.getPropertyValue('--uaemex') || '#2D5016').trim();
+            const textMuted = (rootStyles.getPropertyValue('--text-muted') || '#7a8f6a').trim();
+            const textLight = (rootStyles.getPropertyValue('--text-light') || '#a5b896').trim();
+            const bgDark = (rootStyles.getPropertyValue('--bg-dark') || '#dde3d6').trim();
             
             new Chart(ctx, {
                 type: 'line',
@@ -163,13 +168,13 @@
                         label: 'Respuestas',
                         data: data,
                         backgroundColor: 'rgba(45, 80, 22, 0.12)',
-                        borderColor: '#2D5016',
+                        borderColor: uaemex,
                         borderWidth: 3,
                         tension: 0.35,
                         fill: true,
                         pointRadius: hasData ? 4 : 0,
                         pointHoverRadius: 6,
-                        pointBackgroundColor: '#2D5016',
+                        pointBackgroundColor: uaemex,
                         pointBorderWidth: 0
                     }]
                 },
@@ -179,7 +184,7 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#2D5016',
+                            backgroundColor: uaemex,
                             padding: 10,
                             cornerRadius: 8,
                             displayColors: false
@@ -189,14 +194,14 @@
                         y: {
                             display: true,
                             beginAtZero: true,
-                            grid: { color: 'rgba(0,0,0,0.06)' },
-                            ticks: { color: '#6B7280', font: { size: 11, weight: '700' } },
+                            grid: { color: bgDark },
+                            ticks: { color: textMuted, font: { size: 11, weight: '700' } },
                             border: { display: false }
                         },
                         x: {
                             grid: { display: false },
                             border: { display: false },
-                            ticks: { color: '#6B7280', font: { size: 11, weight: '700' }, maxRotation: 0, autoSkip: true }
+                            ticks: { color: textMuted, font: { size: 11, weight: '700' }, maxRotation: 0, autoSkip: true }
                         }
                     },
                     layout: {

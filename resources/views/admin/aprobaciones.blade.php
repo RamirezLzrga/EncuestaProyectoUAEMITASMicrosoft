@@ -4,9 +4,8 @@
 
 @section('content')
     {{-- HEADER --}}
-    <div style="margin-bottom:30px;">
-        <div style="font-size:11px; font-weight:800; color:var(--oro); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">FLUJO EDITORIAL</div>
-        <h1 style="font-family:'Sora',sans-serif; font-size:32px; font-weight:700; color:var(--uaemex); margin-bottom:8px;">Sistema de Aprobaciones</h1>
+    <div style="margin-bottom:30px; text-align:center;">
+        <h1 style="font-family:'Sora',sans-serif; font-size:32px; font-weight:700; color:var(--text-dark); margin-bottom:8px;">Sistema de Aprobaciones</h1>
         <p style="color:var(--text-muted);">Revisa y gestiona las encuestas pendientes de publicación</p>
     </div>
 

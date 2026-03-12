@@ -19,7 +19,6 @@
         <div style="display:flex; justify-content:center; align-items:flex-end; margin-bottom:22px; text-align:center;">
             <div>
                 <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:6px;">
-                    <div style="font-size:11px; font-weight:800; color:var(--oro); letter-spacing:1px; text-transform:uppercase;">ADMINISTRACIÓN</div>
                 </div>
                 <h1 style="font-family:'Sora',sans-serif; font-size:32px; font-weight:700; color:var(--text-dark); margin-bottom:8px;">Usuarios del Sistema</h1>
                 <p style="color:var(--text-muted);">Gestiona roles, estados y permisos</p>
