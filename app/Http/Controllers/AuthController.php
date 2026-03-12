@@ -129,8 +129,7 @@ class AuthController extends Controller
                     $request->session()->forget('_old_input');
 
                     return redirect()
-                        ->route('login')
-                        ->withErrors(['email' => 'Tu cuenta fue verificada, pero está pendiente de aprobación del administrador.']);
+                        ->route('login', ['pending' => 1, 'reason' => 'inactive']);
                 }
 
                 // Login exitoso
@@ -179,8 +178,7 @@ class AuthController extends Controller
                     $request->session()->forget('_old_input');
 
                     return redirect()
-                        ->route('login')
-                        ->withErrors(['email' => 'Tu cuenta fue creada correctamente y está pendiente de aprobación del administrador.']);
+                        ->route('login', ['pending' => 1, 'reason' => 'new']);
                 } catch (\Exception $e) {
                     Log::error('Error creating user: '.$e->getMessage());
 
@@ -222,8 +220,7 @@ class AuthController extends Controller
                     $request->session()->regenerateToken();
                     $request->session()->forget('_old_input');
 
-                    return back()
-                        ->withErrors(['email' => 'Tu cuenta está pendiente de aprobación del administrador.']);
+                    return redirect()->route('login', ['pending' => 1, 'reason' => 'inactive']);
                 }
             }
 

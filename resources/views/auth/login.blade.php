@@ -484,6 +484,68 @@
     border-radius: 0 0 4px 0;
     opacity: 0.5;
   }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 1000;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--blanco);
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.22), 0 0 0 1px var(--borde);
+    overflow: hidden;
+  }
+
+  .modal-head {
+    padding: 18px 18px;
+    background: linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde) 100%);
+    color: var(--blanco);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  .modal-close {
+    border: none;
+    background: rgba(255,255,255,0.14);
+    color: var(--blanco);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .modal-body { padding: 18px 18px 6px; }
+
+  .modal-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    color: var(--gris-texto);
+    line-height: 1.55;
+  }
+
+  .modal-actions { padding: 12px 18px 18px; }
 </style>
 @endpush
 
@@ -513,6 +575,28 @@
     </div>
 
     <div class="card-body">
+      @if(request()->boolean('pending'))
+        <div class="demo-box" style="margin-top:0;">
+          <div class="demo-icon">!</div>
+          <div>
+            <div class="demo-title">Cuenta en verificación</div>
+            <div class="demo-cred">
+              @if(request('reason') === 'new')
+                Tu cuenta fue creada y está siendo verificada por un administrador.
+              @else
+                Tu cuenta está siendo verificada por un administrador.
+              @endif
+            </div>
+          </div>
+        </div>
+
+        <a href="{{ route('login') }}" class="btn-login" style="text-decoration:none; margin-top:16px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Regresar
+        </a>
+      @else
       <form action="{{ route('login') }}" method="POST" autocomplete="off">
         @csrf
 
@@ -572,7 +656,31 @@
 
         <div class="options-row">
           
-          <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+          <a href="#" class="forgot-link" id="forgot-password-link">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <div class="modal-overlay" id="forgot-password-modal" aria-hidden="true">
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="forgot-password-title">
+            <div class="modal-head">
+              <div class="modal-title" id="forgot-password-title">Recuperar contraseña</div>
+              <button type="button" class="modal-close" id="forgot-password-close" aria-label="Cerrar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="modal-text">
+                Para recuperar tu contraseña, comunícate con el administrador o con el área de soporte correspondiente.
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-login" id="forgot-password-ok" style="text-transform:none; letter-spacing:0; padding:12px 18px;">
+                Entendido
+              </button>
+            </div>
+          </div>
         </div>
 
         <button type="submit" class="btn-login">
@@ -626,10 +734,49 @@
         })();
       </script>
 
+      <script>
+        (function () {
+          var link = document.getElementById('forgot-password-link');
+          var modal = document.getElementById('forgot-password-modal');
+          var closeBtn = document.getElementById('forgot-password-close');
+          var okBtn = document.getElementById('forgot-password-ok');
+          if (!link || !modal || !closeBtn || !okBtn) return;
+
+          function openModal() {
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            closeBtn.focus();
+          }
+
+          function closeModal() {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+            link.focus();
+          }
+
+          link.addEventListener('click', function (e) {
+            e.preventDefault();
+            openModal();
+          });
+
+          closeBtn.addEventListener('click', closeModal);
+          okBtn.addEventListener('click', closeModal);
+
+          modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+          });
+
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+          });
+        })();
+      </script>
+
 
       <div class="register-row">
         ¿No tienes cuenta? Acude al departamento correspondiente</a>
       </div>
+      @endif
     </div>
 
     <div class="card-footer">

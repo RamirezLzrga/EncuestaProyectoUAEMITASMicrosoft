@@ -41,7 +41,7 @@
 
         <div class="fn-search">
             <div class="fn-search-icon">🔍</div>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar encuesta..." class="fn-input" style="width: 100%;">
+            <input type="text" name="search" id="survey-search" value="{{ request('search') }}" placeholder="Buscar encuesta..." class="fn-input" style="width: 100%;">
         </div>
 
         <a href="{{ route('surveys.index') }}" class="btn btn-neu btn-sm" style="color: var(--text-dark);">
@@ -53,70 +53,72 @@
 
 {{-- Content --}}
 <div style="margin-top: 24px;">
-    @if(session('success'))
-        <div style="background: var(--green-pale); color: var(--green); padding: 12px 20px; border-radius: var(--radius); margin-bottom: 20px; font-weight: 600; font-size: 13.5px; box-shadow: var(--neu-out);">
-            {{ session('success') }}
-        </div>
-    @endif
+    <div id="surveys-results">
+        @if(session('success'))
+            <div style="background: var(--green-pale); color: var(--green); padding: 12px 20px; border-radius: var(--radius); margin-bottom: 20px; font-weight: 600; font-size: 13.5px; box-shadow: var(--neu-out);">
+                {{ session('success') }}
+            </div>
+        @endif
 
-    @if($surveys->count() > 0)
-        <div class="surveys-grid">
-            @foreach($surveys as $survey)
-                <div class="survey-card" onclick="window.location='{{ route('editor.encuestas.editar', $survey) }}'">
-                    <div class="sc-banner {{ $survey->is_active ? 'activa' : 'borrador' }}"></div>
-                    <div class="sc-body">
-                        <div class="sc-top">
-                            <div class="sc-name">{{ $survey->title }}</div>
-                            <div class="badge-neu {{ $survey->is_active ? 'bn-green' : 'bn-muted' }}">
-                                {{ $survey->is_active ? 'ACTIVA' : 'BORRADOR' }}
-                            </div>
-                        </div>
-                        <div class="sc-desc">{{ Str::limit($survey->description ?? 'Sin descripción', 50) }}</div>
-                        
-                        <div class="sc-stats">
-                            <div class="sc-stat">
-                                <div class="sc-stat-val">{{ $survey->responses()->count() }}</div>
-                                <div class="sc-stat-lbl">Resp.</div>
-                            </div>
-                            <div class="sc-stat">
-                                <div class="sc-stat-val">{{ count($survey->questions ?? []) }}</div>
-                                <div class="sc-stat-lbl">Preg.</div>
-                            </div>
-                            <div class="sc-stat">
-                                <div class="sc-stat-val">
-                                    @php
-                                        $approval = $survey->approval_status ?? 'pending';
-                                        $icon = $approval === 'approved' ? '✅' : ($approval === 'rejected' ? '❌' : '⏳');
-                                    @endphp
-                                    {{ $icon }}
+        @if($surveys->count() > 0)
+            <div class="surveys-grid">
+                @foreach($surveys as $survey)
+                    <div class="survey-card" onclick="window.location='{{ route('editor.encuestas.editar', $survey) }}'">
+                        <div class="sc-banner {{ $survey->is_active ? 'activa' : 'borrador' }}"></div>
+                        <div class="sc-body">
+                            <div class="sc-top">
+                                <div class="sc-name">{{ $survey->title }}</div>
+                                <div class="badge-neu {{ $survey->is_active ? 'bn-green' : 'bn-muted' }}">
+                                    {{ $survey->is_active ? 'ACTIVA' : 'BORRADOR' }}
                                 </div>
-                                <div class="sc-stat-lbl">Estado</div>
                             </div>
-                        </div>
+                            <div class="sc-desc">{{ Str::limit($survey->description ?? 'Sin descripción', 50) }}</div>
+                            
+                            <div class="sc-stats">
+                                <div class="sc-stat">
+                                    <div class="sc-stat-val">{{ $survey->responses()->count() }}</div>
+                                    <div class="sc-stat-lbl">Resp.</div>
+                                </div>
+                                <div class="sc-stat">
+                                    <div class="sc-stat-val">{{ count($survey->questions ?? []) }}</div>
+                                    <div class="sc-stat-lbl">Preg.</div>
+                                </div>
+                                <div class="sc-stat">
+                                    <div class="sc-stat-val">
+                                        @php
+                                            $approval = $survey->approval_status ?? 'pending';
+                                            $icon = $approval === 'approved' ? '✅' : ($approval === 'rejected' ? '❌' : '⏳');
+                                        @endphp
+                                        {{ $icon }}
+                                    </div>
+                                    <div class="sc-stat-lbl">Estado</div>
+                                </div>
+                            </div>
 
-                        <div class="sc-author">
-                            <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
-                                📅 {{ $survey->created_at ? $survey->created_at->format('d/m/Y') : '--' }}
-                            </div>
-                            <div style="display: flex; gap: 6px;">
-                                <a href="{{ route('surveys.public', $survey->id) }}" target="_blank" title="Ver pública" style="color: var(--text-muted); transition: color .2s;" onclick="event.stopPropagation()">🔗</a>
-                                <a href="{{ route('editor.encuestas.respuestas', $survey) }}" title="Resultados" style="color: var(--text-muted); transition: color .2s;" onclick="event.stopPropagation()">📊</a>
+                            <div class="sc-author">
+                                <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
+                                    📅 {{ $survey->created_at ? $survey->created_at->format('d/m/Y') : '--' }}
+                                </div>
+                                <div style="display: flex; gap: 6px;">
+                                    <a href="{{ route('surveys.public', $survey->id) }}" target="_blank" title="Ver pública" style="color: var(--text-muted); transition: color .2s;" onclick="event.stopPropagation()">🔗</a>
+                                    <a href="{{ route('editor.encuestas.respuestas', $survey) }}" title="Resultados" style="color: var(--text-muted); transition: color .2s;" onclick="event.stopPropagation()">📊</a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
-        </div>
-    @else
-        <div class="empty-state">
-            <div class="empty-icon">🔍</div>
-            <h3 class="empty-title">No se encontraron encuestas</h3>
-            <p class="empty-sub">Intenta ajustar los filtros de búsqueda o crea tu primera encuesta</p>
-            <a href="{{ route('editor.encuestas.nueva') }}" class="btn btn-solid" style="margin-top: 16px;">
-                + Crear encuesta
-            </a>
-        </div>
-    @endif
+                @endforeach
+            </div>
+        @else
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h3 class="empty-title">No se encontraron encuestas</h3>
+                <p class="empty-sub">Intenta ajustar los filtros de búsqueda o crea tu primera encuesta</p>
+                <a href="{{ route('editor.encuestas.nueva') }}" class="btn btn-solid" style="margin-top: 16px;">
+                    + Crear encuesta
+                </a>
+            </div>
+        @endif
+    </div>
 </div>
 
 @endsection
@@ -165,5 +167,66 @@
                 }
             });
         });
+    </script>
+    <script>
+        (function () {
+            var form = document.getElementById('filtersForm');
+            if (!form) return;
+            var searchInput = form.querySelector('input[name="search"]');
+            var results = document.getElementById('surveys-results');
+            if (!searchInput || !results) return;
+
+            var timer = null;
+            var lastQuery = null;
+            var activeController = null;
+
+            function buildUrl() {
+                var params = new URLSearchParams(new FormData(form));
+                var query = params.toString();
+                return {
+                    url: form.action + (query ? ('?' + query) : ''),
+                    query: query,
+                };
+            }
+
+            function setLoading(isLoading) {
+                results.style.opacity = isLoading ? '0.65' : '';
+                results.style.pointerEvents = isLoading ? 'none' : '';
+                results.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+            }
+
+            function run() {
+                var built = buildUrl();
+                if (built.query === lastQuery) return;
+                lastQuery = built.query;
+
+                if (activeController) activeController.abort();
+                activeController = new AbortController();
+
+                setLoading(true);
+
+                fetch(built.url, {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    signal: activeController.signal,
+                })
+                    .then(function (r) { return r.text(); })
+                    .then(function (html) {
+                        var doc = new DOMParser().parseFromString(html, 'text/html');
+                        var next = doc.getElementById('surveys-results');
+                        if (next) {
+                            results.innerHTML = next.innerHTML;
+                            window.history.replaceState({}, '', built.url);
+                        }
+                    })
+                    .catch(function () {})
+                    .finally(function () { setLoading(false); });
+            }
+
+            searchInput.addEventListener('input', function () {
+                if (timer) window.clearTimeout(timer);
+                timer = window.setTimeout(run, 260);
+            });
+        })();
     </script>
 @endpush

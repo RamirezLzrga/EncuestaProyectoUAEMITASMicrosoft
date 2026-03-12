@@ -229,6 +229,20 @@
 @section('content')
 
 {{-- Page Header --}}
+@php
+    $mode = $mode ?? 'create';
+    if (! isset($survey) || ! $survey) {
+        $survey = new \App\Models\Survey([
+            'title' => '',
+            'description' => '',
+            'year' => (int) date('Y'),
+            'start_date' => now(),
+            'end_date' => now()->addMonth(),
+            'settings' => [],
+            'questions' => [],
+        ]);
+    }
+@endphp
 <div class="ph">
     <div>
         <div class="ph-label">Admin · {{ $mode === 'create' ? 'Nueva Encuesta' : 'Editar Encuesta' }}</div>

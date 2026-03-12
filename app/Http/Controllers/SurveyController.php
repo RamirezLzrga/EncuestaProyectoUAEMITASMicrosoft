@@ -17,10 +17,28 @@ class SurveyController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Survey::with('user')->where('user_id', Auth::id());
+        $user = Auth::user();
+        $isAdmin = $user && $user->role === 'admin';
+
+        $query = Survey::with('user');
+        $datesQuery = Survey::query();
+        $users = null;
+
+        if (! $isAdmin) {
+            $query->where('user_id', Auth::id());
+            $datesQuery->where('user_id', Auth::id());
+        } else {
+            $users = User::orderBy('name', 'asc')->get();
+
+            $userId = $request->input('user_id');
+            if (! empty($userId) && $userId !== 'all') {
+                $query->where('user_id', $userId);
+                $datesQuery->where('user_id', $userId);
+            }
+        }
 
         // Obtener todas las fechas donde hay encuestas (para el calendario)
-        $surveyDates = Survey::where('user_id', Auth::id())
+        $surveyDates = $datesQuery
             ->pluck('start_date')
             ->map(function ($date) {
                 // Asegurarse de tener solo la parte de fecha Y-m-d
@@ -36,22 +54,47 @@ class SurveyController extends Controller
         }
 
         if ($request->has('status') && $request->status != 'Todas') {
-            $isActive = $request->status == 'Activas';
-            $query->where('is_active', $isActive);
+            $status = $request->status;
+
+            if ($status === 'Pendientes') {
+                $query->where('approval_status', 'pending');
+            } elseif ($status === 'Activas') {
+                $query->where(function ($q) {
+                    $q->whereNull('approval_status')->orWhere('approval_status', '!=', 'pending');
+                })->where('is_active', true);
+            } elseif ($status === 'Inactivas') {
+                $query->where(function ($q) {
+                    $q->whereNull('approval_status')->orWhere('approval_status', '!=', 'pending');
+                })->where('is_active', false);
+            }
         }
 
-        if ($request->has('search')) {
-            $query->where('title', 'like', '%'.$request->search.'%');
+        if ($request->has('search') && $request->search !== null && $request->search !== '') {
+            $term = trim((string) $request->search);
+            $like = '%'.$term.'%';
+
+            $query->where(function ($q) use ($like, $term) {
+                $q->where('title', 'like', $like)
+                    ->orWhere('description', 'like', $like);
+
+                if (is_numeric($term)) {
+                    $q->orWhere('year', (int) $term);
+                }
+
+                $q->orWhereHas('user', function ($uq) use ($like) {
+                    $uq->where('name', 'like', $like)
+                        ->orWhere('email', 'like', $like);
+                });
+            });
         }
 
         $surveys = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        $user = Auth::user();
-        $view = $user && $user->role === 'admin'
+        $view = $isAdmin
             ? 'surveys.index'
             : 'editor.encuestas.index';
 
-        return view($view, compact('surveys', 'surveyDates'));
+        return view($view, compact('surveys', 'surveyDates', 'users'));
     }
 
     /**
@@ -59,7 +102,20 @@ class SurveyController extends Controller
      */
     public function create()
     {
-        return view('surveys.create');
+        $survey = new Survey([
+            'title' => '',
+            'description' => '',
+            'year' => (int) date('Y'),
+            'start_date' => now(),
+            'end_date' => now()->addMonth(),
+            'settings' => [],
+            'questions' => [],
+        ]);
+
+        return view('surveys.create', [
+            'survey' => $survey,
+            'mode' => 'create',
+        ]);
     }
 
     /**
@@ -273,10 +329,14 @@ class SurveyController extends Controller
             abort(403, 'Solo los administradores pueden cambiar el estado de las encuestas.');
         }
 
+        if ($survey->approval_status === 'pending') {
+            return back()->with('error', 'Primero debes revisar y aprobar/rechazar la encuesta.');
+        }
+
         $survey->is_active = ! $survey->is_active;
         $survey->save();
 
-        $status = $survey->is_active ? 'habilitada' : 'inhabilitada';
+        $status = $survey->is_active ? 'activada' : 'desactivada';
 
         ActivityLog::create([
             'user_id' => Auth::id(),
